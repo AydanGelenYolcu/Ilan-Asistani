@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Kullanım Kılavuzu - İlan Asistanı</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: #2d3436;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 24px rgba(9, 132, 227, 0.3);
+        }
+
+        .hero h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .hero .version {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            color: #2d3436;
+            margin: 28px 0 12px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h3 {
+            color: #636e72;
+            margin: 16px 0 8px;
+            font-size: 15px;
+        }
+
+        .section {
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+            border-left: 4px solid #0984e3;
+        }
+
+        .section.green {
+            border-left-color: #00b894;
+        }
+
+        .section.purple {
+            border-left-color: #6c5ce7;
+        }
+
+        .section.orange {
+            border-left-color: #e17055;
+        }
+
+        .section.yellow {
+            border-left-color: #fdcb6e;
+        }
+
+        .section.red {
+            border-left-color: #d63031;
+        }
+
+        .section.teal {
+            border-left-color: #00cec9;
+        }
+
+        code {
+            background: #f1f2f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #6c5ce7;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.new {
+            background: #00b894;
+            color: white;
+        }
+
+        .badge.update {
+            background: #0984e3;
+            color: white;
+        }
+
+        .badge.pro {
+            background: #6c5ce7;
+            color: white;
+        }
+
+        .info {
+            border-left: 4px solid #74b9ff;
+            background: #f0f7ff;
+            padding: 12px 15px;
+            margin: 12px 0;
+            border-radius: 0 6px 6px 0;
+            font-size: 13px;
+        }
+
+        .info.warn {
+            border-left-color: #fdcb6e;
+            background: #fef9e7;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .arch-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .arch-item {
+            background: #f8f9fa;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            border: 1px solid #e9ecef;
+        }
+
+        .arch-item strong {
+            color: #6c5ce7;
+            display: block;
+            font-size: 12px;
+        }
+
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+            font-size: 13px;
+        }
+
+        .flow span {
+            background: #dfe6e9;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .flow .arrow {
+            background: none;
+            color: #636e72;
+            font-size: 16px;
+        }
+
+        .shortcut-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+
+        .shortcut-table th {
+            background: #f1f2f6;
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .shortcut-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f2f6;
+        }
+
+        footer {
+            text-align: center;
+            color: #636e72;
+            font-size: 12px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #dfe6e9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══ HERO ═══ -->
+    <div class="hero">
+        <span class="version">v4.1 — NaN Retry, Freeze Önleme, Dinamik Excel</span>
+        <h1>📘 İlan Asistanı Kılavuzu</h1>
+        <p>Sahibinden.com &amp; Hepsiemlak ilan verilerini topla, analiz et, dışa aktar. Harita desteği, akıllı ayrıştırma, döviz dönüşümü ve <strong>sim.csb.gov.tr hava kalitesi parametresi analizi</strong> ile çok daha fazlası.</p>
+    </div>
+
+    <!-- ═══ 2. TEMEL KULLANIM ═══ -->
+    <div class="section green">
+        <h2>📋 1. Temel Kullanım</h2>
+
+        <h3>İlan Sayfasında Veri Çekme</h3>
+        <div class="flow">
+            <span>İlan Aç</span>
+            <span class="arrow">→</span>
+            <span>🔍 Veri Çek</span>
+            <span class="arrow">→</span>
+            <span>Doğrula</span>
+            <span class="arrow">→</span>
+            <span>💾 Kaydet</span>
+        </div>
+        <ul>
+            <li><strong>Veri Çek:</strong> İlan detay sayfasındaki panelden butona tıklayın</li>
+            <li><strong>Proje Seç:</strong> Verileri gruplamak için proje seçin veya <strong>+</strong> ile yeni
+                oluşturun</li>
+            <li><strong>Hızlı Ekle:</strong> Paneldeki formu kullanarak m², aidat ve fiyatı manuel girin</li>
+            <li><strong>📊 Paneli Aç:</strong> Dashboard'u açarak tüm verilerinizi görün</li>
+        </ul>
+
+        <div class="info">
+            <strong>💡 Desteklenen Siteler:</strong> Sahibinden.com ve Hepsiemlak.com ilan detay sayfaları desteklenir. Hepsiemlak'ta <code>Brüt / Net M2</code> alanı (örn: <code>75 m2 / 61 m2</code>) otomatik ayrıştırılır; aidat tabloda yoksa açıklama metninden çekilir.
+        </div>
+        <div class="info">
+            <strong>💡 İpucu:</strong> Aynı ilan tekrar çekilmeye çalışılırsa « ⚠️ Bu projede zaten var! » uyarısı
+            verilir. Linklerin sonundaki gereksiz parametreler otomatik temizlenerek (Normalization) hata payı sıfıra
+            indirilir.
+        </div>
+    </div>
+
+    <!-- ═══ 3. HARİTA DRAG & DROP ═══ -->
+    <div class="section purple">
+        <h2>🗺️ 2. Harita Sürükle-Bırak <span class="badge new">YENİ</span></h2>
+
+        <p>Sahibinden'in harita arama sayfasında pinleri doğrudan panele sürükleyerek ilan ekleyin.</p>
+
+        <h3>Nasıl Çalışır?</h3>
+        <div class="flow">
+            <span>Harita Aç</span>
+            <span class="arrow">→</span>
+            <span>📌 Pini Tut</span>
+            <span class="arrow">→</span>
+            <span>Panele Sürükle</span>
+            <span class="arrow">→</span>
+            <span>Otomatik Çek</span>
+        </div>
+        <ul>
+            <li><strong>Otomatik Algılama:</strong> Harita sayfasına girdiğinizde panel yeşil "🗺️ Harita Modu" etiketi
+                gösterir</li>
+            <li><strong>MutationObserver:</strong> Haritayı kaydırdığınızda yeni gelen pinler otomatik olarak
+                sürüklenebilir olur</li>
+            <li><strong>Arka Plan Çekimi:</strong> Pin bırakıldığında ilan detay sayfası arka planda çekilir — Meta Tag
+                analizi ve sanal DOM işlemleriyle en kararlı veriler (fiyat, m², aidat) anında alınır.</li>
+            <li><strong>Proje Entegrasyonu:</strong> Çekilen veri, panelde seçili projeye kaydedilir</li>
+        </ul>
+
+        <div class="info warn">
+            <strong>⚠️ Not:</strong> Harita pinlerinin yapısı Sahibinden tarafından değiştirilebilir. Pin
+            sürüklenemiyorsa, sayfayı yenileyip tekrar deneyin.
+        </div>
+    </div>
+
+    <!-- ═══ 4. GELİŞMİŞ M² MOTORU ═══ -->
+    <div class="section">
+        <h2>🔬 3. Gelişmiş m² Motoru <span class="badge pro">PRO</span></h2>
+
+        <div class="info">
+            <strong>Teknoloji:</strong> Bağlamsal Yakınlık (Proximity Detection) + Gürültü Filtreleme ile hatasız
+            ayrıştırma.
+        </div>
+
+        <h3>🔍 Bağlamsal Yakınlık</h3>
+        <p>Bir sayı bulunduğunda etrafındaki 25 karakterlik pencere analiz edilir:</p>
+        <ul>
+            <li><strong>Net Sözlüğü:</strong> <code>net</code>, <code>süpürülebilir</code>, <code>faydalı alan</code>,
+                <code>daire içi</code>, <code>iç alan</code>, <code>net kullanım</code>
+            </li>
+            <li><strong>Brüt Sözlüğü:</strong> <code>brüt</code>, <code>total</code>, <code>satışa esas</code>,
+                <code>toplam alan</code>, <code>eklentiler dahil</code>
+            </li>
+        </ul>
+
+        <h3>🛡️ Gürültü Filtreleme</h3>
+        <ul>
+            <li><strong>Fiyat Filtresi:</strong> <code>TL</code>, <code>₺</code>, <code>bin</code>, <code>milyon</code>
+                içeren sayılar alan olarak sayılmaz</li>
+            <li><strong>Kat Filtresi:</strong> <code>3. kat</code>, <code>kat 5</code> gibi ifadeler m² ile
+                karıştırılmaz</li>
+            <li><strong>Ölçek Kontrolü:</strong> >10.000 m² değerler şüpheli işaretlenir</li>
+        </ul>
+
+        <h3>⚡ Otomatik Hesaplamalar</h3>
+        <ul>
+            <li><strong>Büyük/Küçük:</strong> <code>120/100</code> → büyük olan Brüt, küçük olan Net</li>
+            <li><strong>Tahmini Brüt:</strong> Sadece Net bilgi varsa × 1.20 çarpanıyla tahmin</li>
+        </ul>
+    </div>
+
+    <!-- ═══ 5. VERİ DOĞRULAMA ═══ -->
+    <div class="section orange">
+        <h2>✅ 4. Veri Doğrulama Katmanı <span class="badge new">YENİ</span></h2>
+
+        <p>Veriler kaydedilmeden önce otomatik doğrulama ve düzeltme yapılır:</p>
+
+        <table class="shortcut-table">
+            <thead>
+                <tr>
+                    <th>Kontrol</th>
+                    <th>Eylem</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Fiyat ≤ 0</td>
+                    <td>❌ Hata döner, kayıt engellenir</td>
+                </tr>
+                <tr>
+                    <td>Brüt ≤ 0</td>
+                    <td>❌ Hata döner</td>
+                </tr>
+                <tr>
+                    <td>Negatif değerler</td>
+                    <td>❌ Hata döner</td>
+                </tr>
+                <tr>
+                    <td>Net > Brüt</td>
+                    <td>⚠️ Otomatik swap (takas)</td>
+                </tr>
+                <tr>
+                    <td>m² > 10.000</td>
+                    <td>⚠️ Uyarı verilir</td>
+                </tr>
+                <tr>
+                    <td>Fiyat > 1 Milyar</td>
+                    <td>⚠️ Uyarı verilir</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ═══ 5.5 AKILLI ALGILAMA ═══ -->
+    <div class="section">
+        <h2>🧠 4.5 Akıllı Algılama Motoru <span class="badge pro">PRO</span></h2>
+
+        <p>Sistem, ilanın durumunu ve özelliklerini çok katmanlı denetimlerle algılar. Tüm kontroller
+            <strong>büyük/küçük harf ve Türkçe/İngilizce karakter duyarsızdır.</strong>
+        </p>
+
+        <h3>🔤 Harf Duyarsızlığı</h3>
+        <div class="info">
+            Tüm metinler <code>toLocaleLowerCase('tr-TR')</code> ile Türkçe kurallarına göre küçültülür. Regex'lerde
+            <code>/i</code> bayrağı + Türkçe karakter varyasyonları kullanılır.
+        </div>
+        <table class="shortcut-table">
+            <thead>
+                <tr>
+                    <th>Yazım</th>
+                    <th>Algılanır mı?</th>
+                    <th>Nasıl?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Satılık</td>
+                    <td>✅</td>
+                    <td rowspan="4"><code>/sat[ıi]l[ıi]k/i</code> — her harf kombinasyonu yakalanır</td>
+                </tr>
+                <tr>
+                    <td>SATILIK</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>satilik</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Satilık</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Kiralık</td>
+                    <td>✅</td>
+                    <td rowspan="2"><code>/kiral[ıi]k/i</code></td>
+                </tr>
+                <tr>
+                    <td>KİRALIK</td>
+                    <td>✅</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>🏠 Satılık / Kiralık Algılama</h3>
+        <p>3 kaynaktan kontrol edilir (öncelik sırasıyla):</p>
+        <ol>
+            <li><strong>Emlak Tipi</strong> etiketi (örn: "Satılık Arsa", "Kiralık Daire") — <em>öncelikli kaynak</em>
+            </li>
+            <li><strong>Durumu / Kategori</strong> etiketleri</li>
+            <li><strong>İlan başlığı</strong> (fallback)</li>
+        </ol>
+        <div class="info warn">
+            <strong>Neden önemli?</strong> Satılık ilanlarda <strong>Birim Fiyat (₺/m²)</strong> hesaplanmaz. Eşyalı
+            ilanlarda da hesaplanmaz. Bu, analizde tutarsızlığı önler.
+        </div>
+
+        <h3>🛋️ Eşyalı Tespiti</h3>
+        <p>3 ayrı noktadan kontrol edilir:</p>
+        <table class="shortcut-table">
+            <thead>
+                <tr>
+                    <th>Kontrol Noktası</th>
+                    <th>Aranan Pattern</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>İlan Başlığı</td>
+                    <td rowspan="3"><code>/(?:e[şs]yal[ıi]|mob[iı]l?yal[ıi])/i</code><br>eşyalı, esyali, mobilyalı,
+                        mobiyalı, mobilyali…</td>
+                </tr>
+                <tr>
+                    <td>İlan Açıklaması</td>
+                </tr>
+                <tr>
+                    <td>Özellikler Paneli (tıklı öğeler)</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="info">
+            <strong>Akıllı Filtre:</strong> "eşyalı değil" veya "mobilyalı değil" gibi olumsuz ifadeler eşyalı olarak
+            sayılmaz.
+        </div>
+
+        <h3>💵 Aidat Çekimi</h3>
+        <ul>
+            <li><strong>Birincil:</strong> İlan bilgi tablosundan (<code>Aidat</code> veya <code>Aidat (TL)</code>
+                etiketi)</li>
+            <li><strong>Fallback:</strong> Tabloda yoksa ilan açıklamasında
+                <code>/(?:aidat|aidatı)(?:\s+bedeli)?\s*[:\s]*(\d+)/i</code> regex'i ile aranır
+            </li>
+        </ul>
+
+        <h3>⚖️ Birim Fiyat Koşulları</h3>
+        <p>Birim Fiyat (₺/m²) <strong>sadece</strong> şu koşullar sağlandığında hesaplanır:</p>
+        <ul>
+            <li>✅ İlan <strong>Satılık değil</strong> (Kiralık veya Belirsiz)</li>
+            <li>✅ İlan <strong>Eşyalı değil</strong></li>
+            <li>✅ Brüt m² > 0</li>
+        </ul>
+    </div>
+
+    <!-- ═══ 5. KURUMSAL FİLTRELEME & İLETİŞİM ═══ -->
+    <div class="section blue">
+        <h2>🏢 5. Kurumsal Filtreleme & İletişim <span class="badge new">YENİ</span></h2>
+        <p>Profesyonel kullanım için bireysel ilanlar elenir ve emlak ofisi bilgileri mercek altına alınır:</p>
+
+        <div class="info">
+            <strong>🚫 Bireysel İlan Engeli:</strong> Veri kalitesini korumak adına sadece Emlak Ofisi/Kurumsal ilanlar
+            kaydedilebilir. Bireysel ilan çekilmeye çalışıldığında sistem otomatik uyarı verir.
+        </div>
+
+        <table class="shortcut-table">
+            <thead>
+                <tr>
+                    <th>Veri Tipi</th>
+                    <th>Açıklama</th>
+                    <th>Otomatik Çekim</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Emlak Ofisi</strong></td>
+                    <td>Mağaza/Ofis adı (Örn: Nidapark Gayrimenkul)</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td><strong>Danışman</strong></td>
+                    <td>Sorumlu gayrimenkul danışmanı ismi</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td><strong>Telefon</strong></td>
+                    <td>Tüm kayıtlı cep ve ofis numaraları</td>
+                    <td>✅</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="info success">
+            <strong>Dashboard Entegrasyonu:</strong> Çekilen iletişim bilgileri tabloda "İletişim" sütununda gösterilir,
+            Excel ve Kopyala özelliklerine dahil edilir.
+        </div>
+    </div>
+
+    <!-- ═══ 6. AKILLI SAYI TEMİZLEYİCİ ═══ -->
+    <div class="section yellow">
+        <h2>🧹 6. Akıllı Sayı Temizleyici</h2>
+
+        <p>Türkçe ve İngilizce sayı formatlarını otomatik algılar:</p>
+
+        <table class="shortcut-table">
+            <thead>
+                <tr>
+                    <th>Giriş</th>
+                    <th>Sonuç</th>
+                    <th>Açıklama</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>10.750.000</code></td>
+                    <td>10750000</td>
+                    <td>TR binlik ayırıcı</td>
+                </tr>
+                <tr>
+                    <td><code>120,5</code></td>
+                    <td>120.5</td>
+                    <td>TR ondalık virgül</td>
+                </tr>
+                <tr>
+                    <td><code>120.5</code></td>
+                    <td>120.5</td>
+                    <td>EN ondalık nokta</td>
+                </tr>
+                <tr>
+                    <td><code>10.750,50</code></td>
+                    <td>10750.50</td>
+                    <td>TR karma format</td>
+                </tr>
+                <tr>
+                    <td><code>120 bin / 90 bin</code></td>
+                    <td>120000 / 90000</td>
+                    <td>Metin bazlı kısaltma desteği</td>
+                </tr>
+                <tr>
+                    <td><code>5.500</code></td>
+                    <td>5500</td>
+                    <td>3 hane = binlik (Auto-Fix destekli)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ═══ 7. DÖVİZ DÖNÜŞÜMÜ ═══ -->
+    <div class="section">
+        <h2>💱 7. Döviz Dönüşümü</h2>
+        <ul>
+            <li><strong>⚙️ Otomatik Güncelleme:</strong> <code>open.er-api.com</code> üzerinden her 1 saatte
+                güncellenir</li>
+            <li><strong>🔒 Mühürlü Kur:</strong> İlanı çektiğinizdeki kur, ilan ile birlikte saklanır — geçmişe dönük
+                doğru analiz</li>
+            <li><strong>📉 Tahmini Dönüşüm:</strong> Eski kayıtlarda kur yoksa güncel kur kullanılır (<em>gri ve
+                    italik</em> gösterilir)</li>
+            <li><strong>📂 Excel Uyumluluğu:</strong> TL sütununun yanına USD sütunu otomatik eklenir</li>
+        </ul>
+    </div>
+
+    <!-- ═══ 8. PROJE YÖNETİMİ ═══ -->
+    <div class="section green">
+        <h2>📂 8. Proje Yönetimi</h2>
+        <ul>
+            <li><strong>Sekmeler:</strong> İlanları projelere gruplayın (Ofis A, Mağaza B, Nidakule…)</li>
+            <li><strong>🔍 Arama:</strong> Dashboard'da proje ismiyle anlık filtreleme</li>
+            <li><strong>💡 Akıllı Öneri:</strong> Proje kutusuna yazdıkça mevcut projeler listelenir</li>
+            <li><strong>Excel:</strong> Proje bazlı verileri tek tıkla dışa aktarın</li>
+        </ul>
+    </div>
+
+    <!-- ═══ 9. DASHBOARD ARAÇLARI ═══ -->
+    <div class="section purple">
+        <h2>🧰 9. Dashboard Araçları</h2>
+        <ul>
+            <li><strong>💱 Döviz Dönüştürücü:</strong> USD, TRY, EUR, GBP, JPY arasında anlık dönüşüm</li>
+            <li><strong>🧮 Akıllı Hesaplayıcı:</strong> Virgül/nokta ve % hesabı desteği (<code>1000 + 20%</code>)</li>
+            <li><strong>📊 Sıralama:</strong> Fiyat, Birim Fiyat, Aidat sütun başlıklarına tıklayarak sıralama</li>
+            <li><strong>🖼️ Görsel Önizleme:</strong> İlan başlığının üzerine gelince fotoğraf otomatik açılır</li>
+            <li><strong>💡 İpuçları:</strong> Güncellenen ipucu kutusuyla gizli özellikleri keşfedin</li>
+        </ul>
+    </div>
+
+    <!-- ═══ 10. EXCEL YÜKLEME & GEÇMİŞ DÖNEM ═══ -->
+    <div class="section orange">
+        <h2>📤 10. Excel Yükleme & Geçmiş Dönem <span class="badge new">YENİ</span></h2>
+
+        <p>Geçmiş dönem kira ve aidat verilerini Excel dosyasından otomatik doldurun.</p>
+
+        <h3>📌 Nasıl Çalışır?</h3>
+        <div class="flow">
+            <span>📤 Excel Yükle</span>
+            <span class="arrow">→</span>
+            <span>🔍 ID Gir</span>
+            <span class="arrow">→</span>
+            <span>✅ Otomatik Doldur</span>
+        </div>
+
+        <h3>📋 Adımlar</h3>
+        <ol>
+            <li>Dashboard'da <strong>Geçmiş Dönem</strong> bölümünde <strong>📤 Excel Yükle</strong> butonuna tıklayın
+            </li>
+            <li><code>.xlsx</code> veya <code>.xls</code> uzantılı dosyanızı seçin</li>
+            <li>Dosya yüklendikten sonra <strong>🔍 Proje ID</strong> arama kutusu görünür</li>
+            <li>Aramak istediğiniz projenin ID'sini girin</li>
+            <li>3 Ay / 6 Ay / 1 Yıl Önce alanları <strong>otomatik</strong> dolar</li>
+        </ol>
+
+        <h3>📊 Sheet Sıralaması</h3>
+        <table class="shortcut-table">
+            <thead>
+                <tr>
+                    <th>Excel Sheet</th>
+                    <th>Dashboard Alanı</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Sheet 1 (ilk sayfa)</td>
+                    <td>3 Ay Önce</td>
+                </tr>
+                <tr>
+                    <td>Sheet 2</td>
+                    <td>6 Ay Önce</td>
+                </tr>
+                <tr>
+                    <td>Sheet 3</td>
+                    <td>1 Yıl Önce</td>
+                </tr>
+                <tr>
+                    <td>Sheet 4+</td>
+                    <td>Görmezden gelinir</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>🔤 Akıllı Sütun Eşleme</h3>
+        <p>Sütun başlıkları otomatik algılanır (büyük/küçük harf duyarsız):</p>
+        <table class="shortcut-table">
+            <thead>
+                <tr>
+                    <th>Veri Tipi</th>
+                    <th>Anahtar Kelimeler</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>ID</strong></td>
+                    <td><code>id</code>, <code>kod</code>, <code>numara</code>, <code>no</code></td>
+                </tr>
+                <tr>
+                    <td><strong>İsim</strong></td>
+                    <td><code>name</code>, <code>isim</code>, <code>ad</code>, <code>proje</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Kira Fiyatı</strong></td>
+                    <td><code>kira</code>, <code>fiyat</code>, <code>price</code>, <code>rent</code>,
+                        <code>ücret</code>, <code>bedel</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Aidat</strong></td>
+                    <td><code>aidat</code>, <code>bakım</code>, <code>gider</code>, <code>yönetim</code>,
+                        <code>maintenance</code>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="info">
+            <strong>💡 İpucu:</strong> Aynı ID farklı sheet'lerde farklı isimle kayıtlıysa, tüm isimler birlikte
+            gösterilir (örn: "Proje A | Proje A Rev.2").
+        </div>
+
+        <div class="info warn">
+            <strong>⚠️ Önemli:</strong> Değer bulunamayan dönemler boş bırakılır. Dosyayı silmek için
+            <strong>🗑️</strong> butonunu kullanın. ℹ️ ikonunun üzerine gelerek hızlı kullanım kurallarını
+            görebilirsiniz.
+        </div>
+    </div>
+
+    <!-- ═══ 11. HAVA KALİTESİ ANALİZİ ═══ -->
+    <div class="section teal">
+        <h2>🌫️ 11. Hava Kalitesi Analizi <span class="badge new">YENİ</span></h2>
+
+        <p>Dashboard'daki ikinci modül, Türkiye genelindeki hava kalitesi istasyonlarından seçilen parametrelerin (PM10, SO2, PM2.5 vb.) verisini otomatik çekerek şehir bazlı analiz sunar. Veri kaynağı: <strong>sim.csb.gov.tr</strong> (Çevre, Şehircilik ve İklim Değişikliği Bakanlığı).</p>
+
+        <h3>📌 Modüle Erişim</h3>
+        <div class="flow">
+            <span>Dashboard Aç</span>
+            <span class="arrow">→</span>
+            <span>🌫️ Hava Kalitesi Analizi Sekmesi</span>
+        </div>
+
+        <h3>⚙️ Yapılandırma Seçenekleri</h3>
+        <table class="shortcut-table">
+            <thead>
+                <tr>
+                    <th>Ayar</th>
+                    <th>Seçenekler</th>
+                    <th>Açıklama</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Parametre</strong></td>
+                    <td>PM10, SO2, PM2.5 vb.</td>
+                    <td>Çoklu seçim desteklenir; varsayılan PM10</td>
+                </tr>
+                <tr>
+                    <td><strong>Veri Periyodu</strong></td>
+                    <td>Saatlik / Günlük</td>
+                    <td>Saatlik = daha fazla kayıt; Günlük = daha hızlı çekim</td>
+                </tr>
+                <tr>
+                    <td><strong>Tarih Aralığı</strong></td>
+                    <td>Son 7 / 14 / 30 / 90 / 180 / 365 Gün</td>
+                    <td>Hazır seçenekler; tarih otomatik hesaplanır</td>
+                </tr>
+                <tr>
+                    <td><strong>Manuel Tarih</strong></td>
+                    <td>GG.AA.YYYY SS:DD formatı</td>
+                    <td>"Manuel Tarih Gir" seçilince giriş alanları açılır</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>▶ Analizi Başlatma</h3>
+        <div class="flow">
+            <span>Parametre Seç</span>
+            <span class="arrow">→</span>
+            <span>Periyot Seç</span>
+            <span class="arrow">→</span>
+            <span>Tarih Aralığı Seç</span>
+            <span class="arrow">→</span>
+            <span>▶ Analizi Başlat</span>
+            <span class="arrow">→</span>
+            <span>📡 İlerleme Takibi</span>
+            <span class="arrow">→</span>
+            <span>🔄 NaN Retry</span>
+            <span class="arrow">→</span>
+            <span>✅ Sonuçlar</span>
+        </div>
+        <ul>
+            <li>Başlatıldığında <strong>sim.csb.gov.tr</strong> arka planda otomatik açılır, kullanıcı müdahalesi gerekmez</li>
+            <li>9 bölgedeki tüm istasyonlar (Akdeniz, Ege, Marmara, Doğu Anadolu vb.) sırayla taranır</li>
+            <li>Her istasyon için <strong>seçilen parametre(ler)</strong> seçilir ve sorgu çalıştırılır</li>
+            <li><strong>İlerleme çubuğu</strong> hangi grup › şehir › istasyonun işlendiğini anlık gösterir</li>
+            <li><strong>Log kutusu</strong> her adımı zaman damgasıyla kayıt altına alır; tarama bitince log <strong>açık kalır</strong> — kayıtları inceleyebilirsiniz</li>
+            <li><strong>NaN Otomatik Retry:</strong> Ana tarama tamamlandıktan sonra veri dönmeyen istasyonlar otomatik olarak yeniden sorgulanır. Log'da « 🔄 Retry N/toplam » satırları görünür; başarılı olanlar güncellenir</li>
+        </ul>
+
+        <div class="info">
+            <strong>🛡️ Freeze Önleme:</strong> Chrome/Brave arka sekmeleri yavaşlatabilir. Sistem bunu üç yöntemle engeller: (1) <strong>Web Lock</strong> ile sekme kilitlenir, (2) <strong>autoDiscardable: false</strong> ile sekme bellekten atılmaz, (3) dashboard her saniye scraper sekmesine ping göndererek bağlantıyı aktif tutar.
+        </div>
+
+        <h3>⏹ Durdurma</h3>
+        <ul>
+            <li><strong>Durdur</strong> butonuna basıldığında mevcut istasyon tamamlandıktan sonra durur</li>
+            <li>O ana kadar çekilen <strong>kısmi veri otomatik kaydedilir</strong> — veri kaybı olmaz</li>
+            <li>Excel indirme butonu kısmi veriler için de aktif olur</li>
+        </ul>
+
+        <h3>📊 Sonuç Ekranı</h3>
+        <table class="shortcut-table">
+            <thead>
+                <tr>
+                    <th>Gösterge</th>
+                    <th>Açıklama</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Toplam Kayıt</strong></td>
+                    <td>Başarıyla veri alınan istasyon sayısı</td>
+                </tr>
+                <tr>
+                    <td><strong>Son Analiz</strong></td>
+                    <td>Analizin tamamlandığı tarih/saat</td>
+                </tr>
+                <tr>
+                    <td><strong>Tarih Aralığı</strong></td>
+                    <td>Sorgulanan başlangıç — bitiş tarihleri</td>
+                </tr>
+                <tr>
+                    <td><strong>Şehir Bazlı Parametre Tablosu</strong></td>
+                    <td>Grup, şehir, istasyon sayısı, Ort. Min, Ort. Max, Ort. Değer, Ort. Veri %</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>📥 Excel İndir</h3>
+        <p>İki sayfalı bir Excel dosyası oluşturulur. Dosya adı seçilen parametreye göre otomatik oluşur: <code>hava_kalitesi_pm10_YYYYAAGG.xlsx</code></p>
+        <table class="shortcut-table">
+            <thead>
+                <tr>
+                    <th>Sayfa</th>
+                    <th>İçerik</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Ham Veri</strong></td>
+                    <td>İstasyon bazında Min, Max, Ort, Std. Sapma, Veri %, Toplam; son satırda genel özet</td>
+                </tr>
+                <tr>
+                    <td><strong>Şehir Ortalamaları</strong></td>
+                    <td>Şehir bazında tüm istasyonların ortalaması + genel özet satırı</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="info">
+            <strong>💾 Otomatik Kayıt:</strong> Analiz sonuçları <code>chrome.storage.local</code>'da tutulur. Tarayıcıyı kapatsanız bile veriler korunur; bir sonraki açılışta otomatik yüklenir.
+        </div>
+
+        <div class="info warn">
+            <strong>⚠️ Süre Uyarısı:</strong> Tüm Türkiye geneli tarama (saatlik, 30 gün) yaklaşık 20–40 dakika sürebilir. Kısa tarih aralıkları veya Günlük periyot çok daha hızlı çalışır. Analiz sırasında tarayıcıyı kapatmayın.
+        </div>
+
+        <h3>🔧 Teknik Mimari</h3>
+        <p>Manifest V3, içerik scriptlerinin doğrudan extension sayfalarına mesaj göndermesine izin vermez. Bu nedenle özel bir köprü mimarisi kullanılır:</p>
+        <div class="flow">
+            <span>hava_content.js<br><small>(MAIN world)</small></span>
+            <span class="arrow">→ postMessage</span>
+            <span>hava_bridge.js<br><small>(ISOLATED world)</small></span>
+            <span class="arrow">→ chrome.runtime</span>
+            <span>background.js</span>
+            <span class="arrow">→ tabs.sendMessage</span>
+            <span>dashboard.js</span>
+        </div>
+        <ul>
+            <li><strong>hava_content.js</strong> — Kendo UI widget'larına erişmek için MAIN world'e inject edilir; seçilen parametreleri seçip sorgular</li>
+            <li><strong>hava_bridge.js</strong> — ISOLATED world'de çalışır; iki dünya arasında <code>postMessage</code> ↔ <code>chrome.runtime</code> köprüsü kurar</li>
+            <li><strong>background.js</strong> — Mesajları yakalar ve açık olan dashboard sekmesine iletir</li>
+        </ul>
+    </div>
+
+    <!-- ═══ 12. MİMARİ ═══ -->
+    <div class="section red">
+        <h2>🏗️ 12. Modüler Mimari & Teknik Doküman <span class="badge update">v4.1</span></h2>
+
+        <p>Tüm kod, bakımı kolay modüller halinde organize edilmiştir. Daha detaylı teknik analiz için
+            <a href="PROJE_REHBERI.md" target="_blank" style="color:#d63031; font-weight:bold; text-decoration:none;">📂
+                PROJE_REHBERI.md</a>
+            dosyasını inceleyebilirsiniz.
+        </p>
+
+        <div class="arch-grid">
+            <div class="arch-item">
+                <strong>utils/</strong>
+                dom-helpers.js — DOM sorgu + Akıllı Sanitizer<br>
+                storage-manager.js — Chrome Storage CRUD
+            </div>
+            <div class="arch-item">
+                <strong>parsers/</strong>
+                area-parser.js — m² ayrıştırma motoru<br>
+                currency-parser.js — Döviz dönüşümü
+            </div>
+            <div class="arch-item">
+                <strong>scrapers/</strong>
+                base-scraper.js — Temel sınıf (Strategy)<br>
+                sahibinden-scraper.js — Sahibinden kuralları<br>
+                hepsiemlak-scraper.js — Hepsiemlak kuralları<br>
+                scraper-factory.js — Factory Pattern
+            </div>
+            <div class="arch-item">
+                <strong>map/</strong>
+                map-drag-handler.js — Sürükle & Bırak<br>
+                map-scraper.js — Arka plan çekimi
+            </div>
+            <div class="arch-item">
+                <strong>validators/</strong>
+                listing-validator.js — Guard Clause doğrulama
+            </div>
+            <div class="arch-item">
+                <strong>core</strong>
+                content.js — Orkestratör<br>
+                background.js — Mesaj Yönlendirici<br>
+                dashboard.js — Analiz Paneli
+            </div>
+            <div class="arch-item">
+                <strong>hava kalitesi modülü</strong>
+                hava_bridge.js — MV3 Dünya Köprüsü<br>
+                hava_content.js — sim.csb.gov.tr Scraper
+            </div>
+        </div>
+
+        <h3>İlan Asistanı Veri Akışı</h3>
+        <div class="flow">
+            <span>Detect</span>
+            <span class="arrow">→</span>
+            <span>Scrape</span>
+            <span class="arrow">→</span>
+            <span>Validate</span>
+            <span class="arrow">→</span>
+            <span>Currency</span>
+            <span class="arrow">→</span>
+            <span>Save</span>
+        </div>
+
+        <h3>Hava Kalitesi Veri Akışı</h3>
+        <div class="flow">
+            <span>Tab Aç</span>
+            <span class="arrow">→</span>
+            <span>Script Inject</span>
+            <span class="arrow">→</span>
+            <span>Parametre Seç</span>
+            <span class="arrow">→</span>
+            <span>Sorgula</span>
+            <span class="arrow">→</span>
+            <span>Bridge</span>
+            <span class="arrow">→</span>
+            <span>Dashboard</span>
+            <span class="arrow">→</span>
+            <span>Excel</span>
+        </div>
+    </div>
+
+    <!-- ═══ 12. VERİ YÖNETİMİ & DEPOLAMA ═══ -->
+    <div class="section yellow">
+        <h2>💾 12. Veri Yönetimi & Depolama <span class="badge pro">PRO</span></h2>
+
+        <p>Eklenti verileri tamamen bilgisayarınızdaki <code>chrome.storage.local</code> alanında tutulur.</p>
+
+        <h3>📊 Kullanım Alanını Görme</h3>
+        <p>Ne kadar yer kapladığını görmek için Dashboard üzerinde <strong>F12 -> Console</strong> sekmesine şu kodu
+            yapıştırın:</p>
+        <div class="info"
+            style="font-family: monospace; white-space: pre-wrap; background: #2d3436; color: #00b894; border:none; padding:15px; border-radius:8px;">
+            chrome.storage.local.getBytesInUse(null, b => console.log(`Kullanım: ${(b/1024).toFixed(2)} KB`));</div>
+
+        <h3>🧹 Manuel Temizlik ve Sıfırlama</h3>
+        <ul>
+            <li><strong>Application Sekmesi:</strong> F12 -> Application -> Storage -> Local Storage yolunu izleyerek
+                verileri tek tek görebilir ve silebilirsiniz.</li>
+            <li><strong>Tam Sıfırlama:</strong> Tüm verileri kodla silmek için konsola
+                <code>chrome.storage.local.clear()</code> yazabilirsiniz.
+                <span style="color:#d63031; font-weight:bold;">(Bu işlem sadece "İlan Asistanı" verilerini siler; diğer
+                    eklentilerinizi veya tarayıcı ayarlarınızı etkilemez.)</span>
+            </li>
+        </ul>
+
+        <div class="info warn">
+            <strong>Dikkat:</strong> <code>clear()</code> komutu tüm projeleri ve kayıtlı ilanları kalıcı olarak siler.
+            Bu işlem geri alınamaz.
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Sahibinden İlan Asistanı — Professional Analytics Engine v4.1 | İlan Asistanı + Hava Kalitesi Analizi
+    </footer>
+
+</body>
+
+</html>

@@ -1,0 +1,52 @@
+{
+    "manifest_version": 3,
+    "name": "Sahibinden İlan Asistanı",
+    "version": "1.0",
+    "description": "Emlak ilanlarını toplayın, düzenleyin ve verimli bir şekilde analiz edin.",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "alarms",
+        "offscreen",
+        "tabs",
+        "scripting"
+    ],
+    "host_permissions": [
+        "https://api.exchangerate-api.com/*",
+        "https://open.er-api.com/*",
+        "*://sim.csb.gov.tr/*",
+        "https://www.sahibinden.com/*",
+        "*://www.hepsiemlak.com/*",
+        "https://nominatim.openstreetmap.org/*"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Sahibinden İlan Asistanı"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.sahibinden.com/*",
+                "*://www.hepsiemlak.com/*"
+            ],
+            "js": [
+                "utils/dom-helpers.js",
+                "utils/storage-manager.js",
+                "parsers/area-parser.js",
+                "parsers/currency-parser.js",
+                "validators/listing-validator.js",
+                "scrapers/base-scraper.js",
+                "scrapers/sahibinden-scraper.js",
+                "scrapers/hepsiemlak-scraper.js",
+                "scrapers/scraper-factory.js",
+                "map/map-scraper.js",
+                "map/map-drag-handler.js",
+                "content.js"
+            ],
+            "run_at": "document_idle"
+        }
+    ]
+}

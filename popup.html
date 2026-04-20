@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sahibinden İlan Asistanı</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="popup-body">
+  <h1>İlan Asistanı</h1>
+
+  <div class="controls">
+    <button id="scrapeBtn" class="btn-primary">
+      <span>🕵️‍♂️</span> Veri Çek
+    </button>
+    <button id="dashboardBtn" class="btn-secondary">
+      <span>📊</span> Paneli Aç
+    </button>
+  </div>
+
+  <div class="project-selector" style="margin-bottom: 15px;">
+    <label for="popupProjectSelect"
+      style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Aktif Proje:</label>
+    <div style="display: flex; gap: 5px;">
+      <select id="popupProjectSelect"
+        style="flex-grow: 1; padding: 5px; border-radius: 4px; border: 1px solid #ccc;"></select>
+      <button id="popupNewProjectBtn"
+        style="padding: 5px 10px; background-color: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">+</button>
+    </div>
+  </div>
+
+  <div class="quick-add">
+    <h3>Hızlı Ekle</h3>
+    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+      <input type="text" id="quickBrut" placeholder="Brüt m²" class="input-field" style="margin-bottom:0;">
+      <input type="text" id="quickDoluluk" placeholder="Dol %" class="input-field" style="width: 70px; margin-bottom:0;"
+        title="Doluluk Oranı (%)">
+    </div>
+    <input type="text" id="quickAidat" placeholder="Aidat (TL)" class="input-field">
+    <input type="text" id="quickKira" placeholder="Kira/Fiyat (TL)" class="input-field">
+    <button id="quickAddBtn" class="btn-success">
+      <span>➕</span> Ekle
+    </button>
+  </div>
+
+  <div id="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

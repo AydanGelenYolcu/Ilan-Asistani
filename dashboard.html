@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>İlan Asistanı Paneli</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="dashboard-body">
+
+    <!-- ==================== MODÜL SEKMELERİ ==================== -->
+    <div class="module-tab-nav">
+        <button class="module-tab-btn active" data-module="ilan">📋 İlan Asistanı</button>
+        <button class="module-tab-btn" data-module="hava">🌫️ Hava Kalitesi Analizi</button>
+    </div>
+
+    <!-- ==================== ILAN ASISTANI MODÜLÜ ==================== -->
+    <div id="tab-ilan" class="module-tab-content active">
+
+    <div style="display:flex; align-items:center; gap:15px; margin-bottom: 20px; justify-content: space-between;">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <button id="btnOpenGuide" class="info-btn" title="Kullanım Kılavuzu" style="width:40px;">İ</button>
+            <h1 style="margin:0; border-bottom: none; padding-bottom: 0;">📊 İlan Asistanı</h1>
+        </div>
+        <div
+            style="display:flex; align-items:center; gap:8px; background:white; padding:5px 12px; border-radius:30px; border:1px solid #ddd; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <span style="font-size:12px; color:#666; font-weight:600;">Karşılaştırma Birimi:</span>
+            <select id="globalCurrencySelector"
+                style="border:none; outline:none; background:transparent; font-weight:bold; cursor:pointer; color:var(--primary-color);">
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="JPY">JPY (¥)</option>
+                <option value="TL">TRY (₺)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Statistics Area -->
+    <div class="stats-container"
+        style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px;">
+        <div class="stat-card">
+            <h3>Toplam İlan</h3>
+            <div class="value" id="totalCount">0</div>
+            <div style="margin-top:5px; font-size:12px; color:#666; border-top:1px solid #eee; padding-top:5px;">
+                <span id="exchangeRateLabel">Dolar Kuru</span>: <strong id="exchangeRateDisplay"
+                    style="color:#007bff;">-</strong> <small>TL</small>
+                <span id="lastRateUpdate" style="font-size:10px; color:#999; margin-left:3px;"
+                    title="Son Güncelleme"></span>
+                <button id="refreshExchangeBtn"
+                    style="background:none; border:none; cursor:pointer; font-size:12px; margin-left:2px; vertical-align:middle; padding:0;"
+                    title="Kuru Yenile">🔄</button>
+            </div>
+        </div>
+
+        <!-- Price Stats (Rent Only) -->
+        <div class="stat-card">
+            <h3>Kiralık Fiyat/m²</h3>
+            <div style="font-size:13px; color:#666;">Ortalama: <strong id="avgPriceM2" style="color:#333;">0</strong>
+            </div>
+            <div style="font-size:13px; color:#666;">Medyan: <strong id="medPriceM2" style="color:#333;">0</strong>
+            </div>
+            <div style="font-size:13px; color:#666; margin-top:5px; position:relative;" class="tooltip-container">
+                Volatilite (CV) ℹ️
+                <div class="tooltip">CV = Std.Sapma / Ortalama.<br>>0.15 ise fiyatlar istikrarsız.</div>
+                : <span id="cvPriceM2" style="font-weight:bold;">%0</span>
+            </div>
+            <small id="cvPriceMsg" style="display:block; font-size:10px; color:#999; margin-top:2px;"></small>
+        </div>
+
+        <!-- Aidat Stats -->
+        <div class="stat-card">
+            <h3>Aidat/m² (Genel)</h3>
+            <div style="font-size:13px; color:#666;">Ortalama: <strong id="avgAidatM2" style="color:#333;">0</strong>
+            </div>
+            <div style="font-size:13px; color:#666;">Medyan: <strong id="medAidatM2" style="color:#333;">0</strong>
+            </div>
+            <div style="font-size:13px; color:#666; margin-top:5px; position:relative;" class="tooltip-container">
+                Volatilite (CV) ℹ️
+                <div class="tooltip">CV = Std.Sapma / Ortalama.<br>>0.15 ise aidatlar istikrarsız.</div>
+                : <span id="cvAidatM2" style="font-weight:bold;">%0</span>
+            </div>
+            <small id="cvAidatMsg" style="display:block; font-size:10px; color:#999; margin-top:2px;"></small>
+        </div>
+    </div>
+
+    <!-- Hidden File Input for Excel Upload -->
+    <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display:none;">
+
+    <!-- Historical Comparison Section -->
+    <div class="manual-entry-container"
+        style="background:#f0f8ff; padding:15px; margin:20px auto; width:90%; border-radius:8px; display:flex; flex-direction:column; gap:10px;">
+
+        <!-- Header Row with Title + Excel Controls -->
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <h4 style="margin:0; color:#333;">📉 Geçmiş Dönem Karşılaştırması (Birim Fiyat &amp; Aidat)</h4>
+            <div style="display:flex; align-items:center; gap:6px;">
+                <!-- Info Icon -->
+                <div class="tooltip-container" style="position:relative;">
+                    <span class="excel-info-icon" title="Nasıl Kullanılır?">ℹ️</span>
+                    <div class="tooltip excel-info-tooltip">
+                        <strong>📖 Excel Yükleme Kuralları:</strong><br>
+                        • Excel dosyasında her sheet bir dönem (Q1, Q2...) olmalı<br>
+                        • Sütunlar: ID, İsim, Kira, Aidat (başlık isimleri değişebilir)<br>
+                        • Son 3 sheet kullanılır:<br>
+                        &nbsp;&nbsp;Sheet 1 → 3 Ay Önce<br>
+                        &nbsp;&nbsp;Sheet 2 → 6 Ay Önce<br>
+                        &nbsp;&nbsp;Sheet 3 → 1 Yıl Önce<br>
+                        • ID benzersiz (primary key) olmalıdır<br>
+                        • İsim değişse bile ID ile eşleşir, tüm isimler gösterilir<br>
+                        • 4+ sheet varsa en eski sheet'ler görmezden gelinir
+                    </div>
+                </div>
+                <!-- Upload Button -->
+                <button id="excelUploadBtn" class="btn-primary" style="padding:4px 10px; font-size:12px;"
+                    title="Excel Dosyası Yükle">📤 Excel Yükle</button>
+                <!-- Delete Button -->
+                <button id="excelDeleteBtn" class="btn-danger" style="padding:4px 10px; font-size:12px; display:none;"
+                    title="Yüklü dosyayı sil">🗑️</button>
+                <!-- File Label -->
+                <span id="excelFileLabel"
+                    style="font-size:11px; color:#666; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+            </div>
+        </div>
+
+        <!-- ID Search Row -->
+        <div id="excelSearchRow" style="display:none; align-items:center; gap:8px; flex-wrap:wrap;">
+            <label style="font-size:13px; font-weight:bold; color:#333;">🔍 Proje ID:</label>
+            <input type="text" id="excelIdSearch" placeholder="ID girin..." class="hist-input"
+                style="width:120px; font-size:13px;">
+            <span id="excelNamesDisplay"
+                style="font-size:12px; color:#007bff; font-style:italic; max-width:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:10px; align-items:end; font-size:13px;">
+            <div></div> <!-- Spacer -->
+            <div style="font-weight:bold; text-align:center;">3 Ay Önce</div>
+            <div style="font-weight:bold; text-align:center;">6 Ay Önce</div>
+            <div style="font-weight:bold; text-align:center;">1 Yıl Önce</div>
+
+            <!-- Price Row -->
+            <div style="font-weight:bold;">Kiralık Fiyat/m²:</div>
+            <input type="text" id="histPrice3m" placeholder="TL" class="hist-input">
+            <input type="text" id="histPrice6m" placeholder="TL" class="hist-input">
+            <input type="text" id="histPrice1y" placeholder="TL" class="hist-input">
+
+            <!-- Price Result Row (Current vs Hist) -->
+            <div>Değişim (vs Şu An):</div>
+            <div id="resPrice3m" class="hist-result">-</div>
+            <div id="resPrice6m" class="hist-result">-</div>
+            <div id="resPrice1y" class="hist-result">-</div>
+
+            <!-- Price Interval Row (Hist vs Hist) -->
+            <div style="font-size:11px; color:#666;">Aralık Farkı:</div>
+            <div id="intPrice3m" class="hist-result" title="3 Ay vs 6 Ay" style="font-size:11px;">-</div>
+            <div id="intPrice6m" class="hist-result" title="6 Ay vs 1 Yıl" style="font-size:11px;">-</div>
+            <div style="text-align:center; font-size:11px; color:#ccc;">-</div>
+
+            <!-- Aidat Row -->
+            <div style="font-weight:bold; margin-top:5px;">Aidat/m²:</div>
+            <input type="text" id="histAidat3m" placeholder="TL" class="hist-input">
+            <input type="text" id="histAidat6m" placeholder="TL" class="hist-input">
+            <input type="text" id="histAidat1y" placeholder="TL" class="hist-input">
+
+            <!-- Aidat Result Row (Current vs Hist) -->
+            <div>Değişim (vs Şu An):</div>
+            <div id="resAidat3m" class="hist-result">-</div>
+            <div id="resAidat6m" class="hist-result">-</div>
+            <div id="resAidat1y" class="hist-result">-</div>
+
+            <!-- Aidat Interval Row (Hist vs Hist) -->
+            <div style="font-size:11px; color:#666;">Aralık Farkı:</div>
+            <div id="intAidat3m" class="hist-result" title="3 Ay vs 6 Ay" style="font-size:11px;">-</div>
+            <div id="intAidat6m" class="hist-result" title="6 Ay vs 1 Yıl" style="font-size:11px;">-</div>
+            <div style="text-align:center; font-size:11px; color:#ccc;">-</div>
+        </div>
+    </div>
+
+    <!-- Manual Entry Section -->
+    <div class="manual-entry-container"
+        style="background:#fff; padding:15px; margin:20px auto; width:90%; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <h4 style="margin:0; margin-right:15px; color:#333;">✍️ Manuel Ekle:</h4>
+        <input type="text" id="manualTitle" placeholder="Başlık / Not (Opsiyonel)"
+            style="padding:8px; border:1px solid #ddd; border-radius:4px; flex-grow:1;">
+        <select id="manualDurum" style="padding:8px; border:1px solid #ddd; border-radius:4px;">
+            <option value="Satılık">Satılık</option>
+            <option value="Kiralık">Kiralık</option>
+        </select>
+        <input type="text" id="manualPrice" placeholder="Fiyat (TL)"
+            style="padding:8px; border:1px solid #ddd; border-radius:4px; width:120px;">
+        <input type="text" id="manualBrut" placeholder="Brüt m²"
+            style="padding:8px; border:1px solid #ddd; border-radius:4px; width:100px;">
+        <input type="text" id="manualNet" placeholder="Net m²"
+            style="padding:8px; border:1px solid #ddd; border-radius:4px; width:100px;">
+        <input type="text" id="manualAidat" placeholder="Aidat (TL)"
+            style="padding:8px; border:1px solid #ddd; border-radius:4px; width:100px;">
+        <input type="text" id="manualDoluluk" placeholder="Doluluk %"
+            style="padding:8px; border:1px solid #ddd; border-radius:4px; width:100px;">
+        <button id="addManualBtn" class="btn-primary" style="padding:8px 15px;">➕ Ekle</button>
+    </div>
+
+    <!-- Toolbar with Project Tabs & Integrated Widgets -->
+    <div class="toolbar"
+        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 20px; background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #eee;">
+
+        <!-- Project Management (Left) -->
+        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px;">
+            <input type="text" id="projectSearch" placeholder="🔍 Proje Ara..."
+                style="padding:8px 15px; border:1px solid #ddd; border-radius:20px; font-size:13px; outline:none; transition: border-color 0.3s; width: 100%; box-sizing: border-box;">
+            <div id="projectTabs" class="project-tabs"
+                style="display:flex; gap:5px; overflow-x:auto; padding-bottom: 5px;">
+                <!-- Tabs -->
+            </div>
+        </div>
+
+        <!-- Integrated Widgets (Right) -->
+        <div class="integrated-tools"
+            style="display: flex; flex-direction: column; gap: 10px; width: 300px; padding-left: 15px; border-left: 2px solid #f0f0f0;">
+            <!-- Currency Row -->
+            <div
+                style="display: flex; align-items: center; gap: 5px; background: #f8f9fa; padding: 5px 10px; border-radius: 6px;">
+                <span style="font-size: 14px;" title="Döviz Çevirici">💱</span>
+                <input type="number" id="curAmount" value="1"
+                    style="width: 50px; padding: 3px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px;">
+                <select id="curBase" style="padding: 2px; font-size: 11px; border: 1px solid #ddd; border-radius: 3px;">
+                    <option value="USD">USD</option>
+                    <option value="TRY" selected>TRY</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <option value="JPY">JPY</option>
+                </select>
+                </select>
+                <span id="btnSwapCur" style="color:#007bff; cursor:pointer; font-weight:bold; font-size:16px;"
+                    title="Değiştir">⇄</span>
+                <select id="curTarget"
+                    style="padding: 2px; font-size: 11px; border: 1px solid #ddd; border-radius: 3px;">
+                    <option value="USD" selected>USD</option>
+                    <option value="TRY">TRY</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                    <option value="JPY">JPY</option>
+                </select>
+                <div id="curResult"
+                    style="font-size: 12px; font-weight: bold; color: #007bff; min-width: 60px; text-align: right;">0.00
+                </div>
+            </div>
+            <!-- Calc Row -->
+            <div
+                style="display: flex; align-items: center; gap: 5px; background: #f8f9fa; padding: 5px 10px; border-radius: 6px;">
+                <span style="font-size: 14px;" title="Akıllı Hesaplayıcı">🧮</span>
+                <input type="text" id="calcInput" placeholder="Matematik..."
+                    style="flex: 1; padding: 3px 8px; border: 1px solid #ddd; border-radius: 3px; font-size: 12px;">
+                <div id="calcResult"
+                    style="font-size: 12px; font-weight: bold; color: #28a745; min-width: 45px; text-align: right;">0
+                </div>
+                <!-- Info Icon with Tooltip -->
+                <div class="tooltip-container" style="margin-left: 5px;">
+                    <span
+                        style="cursor:help; font-size: 12px; color: #007bff; border: 1px solid #007bff; border-radius: 50%; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; font-weight: bold;">i</span>
+                    <div class="tooltip" style="width: 200px; left: auto; right: 0; bottom: 125%;">
+                        <strong>Akıllı Hesaplayıcı İpuçları:</strong><br>
+                        • Virgül (,) ve nokta (.) desteklenir.<br>
+                        • Yüzde hesabı: <code>1000 + 20%</code> veya <code>500 * 10%</code><br>
+                        • Temel işlemler: +, -, *, /
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Section (Right) -->
+    <div class="actions" style="display:flex; gap:5px; flex-wrap:wrap;">
+        <button id="refreshBtn" class="btn-secondary" style="width: auto; padding: 6px 12px; font-size: 13px;">🔄
+            Yenile</button>
+        <button id="copyAllBtn" class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 13px;">📋
+            Kopyala</button>
+        <button id="downloadBtn" class="btn-success" style="width: auto; padding: 6px 12px; font-size: 13px;">📥
+            Excel</button>
+        <button id="clearAllBtn" class="btn-danger" style="width: auto; padding: 6px 12px; font-size: 13px;"
+            title="Sadece bu projedeki ilanları siler">🗑️ Projeyi Temizle</button>
+        <button id="resetAllBtn" class="btn-danger"
+            style="width: auto; padding: 6px 12px; font-size: 13px; background: #c0392b; border-color: #a93226;"
+            title="TÜM projeleri ve ilanları kalıcı olarak siler!">🔥 Tümünü Sıfırla</button>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th class="sortable" data-sort="Baslik">Başlık <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="Durum">Durum <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="Fiyat">Fiyat <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="Brut">Brüt m² <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="Net">Net m² <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="Doluluk">Doluluk % <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="Aidat">Aidat <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="BirimFiyat">
+                        Birim Fiyat <span class="sort-icon"></span>
+                        <span class="copy-header" title="Sütunu Kopyala" data-key="BirimFiyat"
+                            style="cursor:pointer; font-size:14px; margin-left:5px;">📋</span>
+                    </th>
+                    <th class="sortable" data-sort="AidatM2">
+                        Aidat/m² <span class="sort-icon"></span>
+                        <span class="copy-header" title="Sütunu Kopyala" data-key="AidatM2"
+                            style="cursor:pointer; font-size:14px; margin-left:5px;">📋</span>
+                    </th>
+                    <th>Link</th>
+                    <th>İletişim</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Rows will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="moveModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>Projeye Taşı</h3>
+            <p>Bu ilanı hangi projeye taşımak istiyorsunuz?</p>
+            <select id="moveTargetSelect"
+                style="width:100%; padding:8px; margin-bottom:15px; border:1px solid #ddd; border-radius:4px;"></select>
+            <div class="modal-actions" style="display:flex; gap:10px; justify-content:flex-end;">
+                <button id="cancelMoveBtn" class="btn-secondary" style="width:auto;">İptal</button>
+                <button id="confirmMoveBtn" class="btn-primary" style="width:auto;">Taşı</button>
+            </div>
+        </div>
+    </div>
+
+    </div><!-- /#tab-ilan -->
+
+    <!-- ==================== HAVA KALİTESİ MODÜLÜ ==================== -->
+    <div id="tab-hava" class="module-tab-content" style="display:none;">
+
+        <!-- Konfigürasyon Kartı -->
+        <div class="stat-card" style="text-align:left; margin-bottom:20px; padding:20px;">
+            <h3 style="display:flex; align-items:center; gap:8px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                🌫️ Hava Kalitesi <span id="havaMainTitle">SO2</span> Analizi
+                <span style="font-size:12px; font-weight:400; color:#888; margin-left:4px;">— sim.csb.gov.tr</span>
+            </h3>
+
+            <!-- Veri Periyodu -->
+            <div style="margin-bottom:16px;">
+                <label style="font-weight:600; display:block; margin-bottom:8px; font-size:14px;">Veri Periyodu:</label>
+                <label style="margin-right:24px; font-size:14px; cursor:pointer;">
+                    <input type="radio" name="havaPeriod" value="8" checked style="margin-right:6px;"> Saatlik
+                </label>
+                <label style="font-size:14px; cursor:pointer;">
+                    <input type="radio" name="havaPeriod" value="16" style="margin-right:6px;"> Günlük
+                </label>
+            </div>
+
+            <!-- Parametre Seçimi -->
+            <div style="margin-bottom:16px;">
+                <label style="font-weight:600; display:block; margin-bottom:8px; font-size:14px;">
+                    Parametre:
+                    <span style="font-size:11px; font-weight:400; color:#888;">(birden fazla seçilebilir)</span>
+                </label>
+                <div id="havaParamCheckboxes" style="display:flex; flex-wrap:wrap; gap:8px 20px; padding:10px 14px; background:#f8f9fa; border:1px solid #e0e0e0; border-radius:8px;">
+                    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;"><input type="checkbox" class="hava-param-check" value="SO2"> SO2</label>
+                    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;"><input type="checkbox" class="hava-param-check" value="PM10" checked> PM10</label>
+                    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;"><input type="checkbox" class="hava-param-check" value="PM2.5"> PM2.5</label>
+                    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;"><input type="checkbox" class="hava-param-check" value="NO"> NO</label>
+                    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;"><input type="checkbox" class="hava-param-check" value="NO2"> NO2</label>
+                    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;"><input type="checkbox" class="hava-param-check" value="NOX"> NOX</label>
+                    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;"><input type="checkbox" class="hava-param-check" value="O3"> O3</label>
+                    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;"><input type="checkbox" class="hava-param-check" value="CO"> CO</label>
+                    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:13px;"><input type="checkbox" class="hava-param-check" value="H2S"> H2S</label>
+                </div>
+            </div>
+
+            <!-- Tarih Aralığı -->
+            <div style="margin-bottom:20px;">
+                <label style="font-weight:600; display:block; margin-bottom:8px; font-size:14px;">Tarih Aralığı:</label>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <select id="havaRangePreset" style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; background:white;">
+                        <option value="7">Son 7 Gün</option>
+                        <option value="14">Son 14 Gün</option>
+                        <option value="30" selected>Son 30 Gün</option>
+                        <option value="90">Son 3 Ay</option>
+                        <option value="180">Son 6 Ay</option>
+                        <option value="365">Son 1 Yıl</option>
+                        <option value="custom">Manuel Tarih Gir</option>
+                    </select>
+                    <div id="havaCustomDates" style="display:none; gap:10px; align-items:center;">
+                        <input type="text" id="havaStartDate" placeholder="GG.AA.YYYY SS:DD"
+                            style="padding:8px; border:1px solid #ddd; border-radius:6px; width:160px; font-size:13px;">
+                        <span style="color:#888;">—</span>
+                        <input type="text" id="havaEndDate" placeholder="GG.AA.YYYY SS:DD"
+                            style="padding:8px; border:1px solid #ddd; border-radius:6px; width:160px; font-size:13px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Butonlar -->
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button id="havaStartBtn" class="btn-primary" style="width:auto; padding:10px 28px; font-size:14px;">▶ Analizi Başlat</button>
+                <button id="havaPauseBtn" class="btn-secondary" style="width:auto; padding:10px 28px; font-size:14px; display:none;">⏸ Duraklat</button>
+                <button id="havaResumeBtn" class="btn-primary" style="width:auto; padding:10px 28px; font-size:14px; display:none;">▶ Devam Et</button>
+                <button id="havaStopBtn" class="btn-danger" style="width:auto; padding:10px 28px; font-size:14px; display:none;">⏹ Durdur</button>
+            </div>
+        </div>
+
+        <!-- Progress Bölümü (analiz sırasında görünür) -->
+        <div id="havaProgress" style="display:none; margin-bottom:20px;">
+            <div class="stat-card" style="text-align:left; padding:20px;">
+                <h3 style="border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:14px;">📡 Veri Çekiliyor...</h3>
+                <div class="hava-progress-bar-wrap">
+                    <div id="havaProgressBar" style="width:0%;"></div>
+                </div>
+                <div id="havaProgressText" style="font-size:13px; color:#555; margin-bottom:10px;"></div>
+                <div id="havaLogBox"></div>
+            </div>
+        </div>
+
+        <!-- Kayıtlı Veri Bölümü -->
+        <div id="havaSavedSection" style="display:none;">
+
+            <!-- Oturum Sekmeleri -->
+            <div style="margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h4 style="margin:0; color:#333; font-size:14px;">📂 Analiz Oturumları <span style="font-size:11px; color:#888; font-weight:400;">(isim değiştirmek için çift tıkla)</span></h4>
+                    <button id="havaDeleteAllBtn" class="btn-danger" style="width:auto; padding:4px 12px; font-size:12px;">🗑️ Tümünü Sil</button>
+                </div>
+                <div id="havaSessionTabs" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            </div>
+
+            <!-- Özet Kartlar (aktif oturum) -->
+            <div class="stats-container" style="margin-bottom:20px;">
+                <div class="stat-card">
+                    <h3>Toplam Kayıt</h3>
+                    <div class="value" id="havaTotalCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Son Analiz</h3>
+                    <div class="value" id="havaLastDate" style="font-size:1.1rem;">-</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Tarih Aralığı</h3>
+                    <div class="value" id="havaDateRange" style="font-size:0.95rem; line-height:1.4;">-</div>
+                </div>
+            </div>
+
+            <!-- Eylem Butonları -->
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <button id="havaDownloadBtn" class="btn-success" style="width:auto; padding:8px 20px;">📥 Excel İndir</button>
+                <button id="havaDeleteSessionBtn" class="btn-danger" style="width:auto; padding:8px 20px;">🗑️ Bu Oturumu Sil</button>
+            </div>
+
+            <!-- Tab Butonları -->
+            <div style="display:flex; gap:0; margin-bottom:0; border-bottom:2px solid var(--border-color);">
+                <button id="havaTabCityBtn"
+                    style="padding:8px 20px; border:none; background:var(--primary-color); color:#fff; font-weight:600; cursor:pointer; border-radius:6px 6px 0 0; margin-right:4px;">
+                    Şehir Özeti
+                </button>
+                <button id="havaTabStationBtn"
+                    style="padding:8px 20px; border:none; background:var(--border-color); color:var(--text-color); font-weight:600; cursor:pointer; border-radius:6px 6px 0 0;">
+                    Ham Veri
+                </button>
+            </div>
+
+            <!-- Tab 1: Şehir Özeti -->
+            <div id="havaTabCity" class="table-container" style="border-radius:0 6px 6px 6px;">
+                <h3 id="havaCityTableTitle" style="margin-top:0; margin-bottom:14px;">Şehir Bazlı PM10 Özeti</h3>
+                <table id="havaCityTable">
+                    <thead>
+                        <tr>
+                            <th>İstasyon Grubu</th>
+                            <th>Şehir</th>
+                            <th>İstasyon Sayısı</th>
+                            <th>Ort. Min</th>
+                            <th>Ort. Max</th>
+                            <th id="havaCityAvgHeader">Ort. PM10</th>
+                            <th>Ort. Veri %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="havaCityTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Tab 2: İstasyon Detayı -->
+            <div id="havaTabStation" class="table-container" style="display:none; border-radius:0 6px 6px 6px; overflow-x:auto;">
+                <h3 id="havaStationTableTitle" style="margin-top:0; margin-bottom:14px;">İstasyon Bazlı PM10 Detayı</h3>
+                <table id="havaStationTable" style="font-size:12px;">
+                    <thead>
+                        <tr>
+                            <th>Grup</th>
+                            <th>Şehir</th>
+                            <th>İstasyon</th>
+                            <th>Parametre</th>
+                            <th>Birim</th>
+                            <th>Min</th>
+                            <th>Min Tarih</th>
+                            <th>Max</th>
+                            <th>Max Tarih</th>
+                            <th>Ortalama</th>
+                            <th>Veri Sayısı</th>
+                            <th>Beklenen</th>
+                            <th>Veri %</th>
+                            <th>Periyot</th>
+                        </tr>
+                    </thead>
+                    <tbody id="havaStationTableBody"></tbody>
+                </table>
+            </div>
+
+        </div><!-- /#havaSavedSection -->
+
+    </div><!-- /#tab-hava -->
+
+    <script src="libs/xlsx.full.min.js"></script>
+    <!-- 1. Paylaşılan state (bağımlılık yok) -->
+    <script src="dashboard/state.js"></script>
+    <!-- 2. Saf yardımcılar -->
+    <script src="dashboard/utils.js"></script>
+    <!-- 3. Bağımsız modüller -->
+    <script src="dashboard/widgets.js"></script>
+    <script src="dashboard/stats.js"></script>
+    <script src="dashboard/excel-upload.js"></script>
+    <script src="dashboard/projects.js"></script>
+    <script src="dashboard/table.js"></script>
+    <script src="dashboard/data-entry.js"></script>
+    <script src="dashboard/export.js"></script>
+    <!-- 4. Orkestratör (tüm modülleri çağırır) -->
+    <script src="dashboard/core.js"></script>
+    <!-- 5. Bağımsız hava kalitesi modülü -->
+    <script src="dashboard/hava.js"></script>
+
+</body>
+
+</html>

@@ -76,7 +76,7 @@ const StorageManager = {
         const normalizedItemLink = DOMHelpers.normalizeUrl(item.Link);
         const existingIndex = list.findIndex(
             existing => DOMHelpers.normalizeUrl(existing.Link) === normalizedItemLink &&
-                (existing.project || 'Varsayılan') === project
+                (existing.project || 'Varsayılan').trim() === project
         );
 
         if (existingIndex !== -1) {

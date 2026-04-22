@@ -53,8 +53,9 @@ class SahibindenScraper extends BaseScraper {
         const emlakTipi = DOMHelpers.getFromMap(infoMap, ['Emlak Tipi']);
         let durum = emlakTipi !== '0' ? emlakTipi : DOMHelpers.getFromMap(infoMap, ['Durumu']);
         const kategori = DOMHelpers.getFromMap(infoMap, ['Kategori']);
-        // emlakTipi'ni her zaman checkStr'e ekle (güvenlik ağı)
-        const checkStr = (durum + ' ' + kategori + ' ' + title + ' ' + emlakTipi).toLocaleLowerCase('tr-TR');
+        // emlakTipi'ni her zaman checkStr'e ekle; URL path iş yeri gibi kategoriler için güvenlik ağı
+        // (iş yeri ilanlarında tabloda ne "Emlak Tipi" ne "İlan Durumu" olur, sadece URL'de "satilik/kiralik" geçer)
+        const checkStr = (durum + ' ' + kategori + ' ' + title + ' ' + emlakTipi + ' ' + window.location.pathname).toLocaleLowerCase('tr-TR');
         const { isSatilik, isKiralik } = this.detectStatus(checkStr);
 
         // Guard: Durum label düzeltmesi

@@ -76,6 +76,7 @@ async function scrapeListing() {
             agentName: data.agentName,
             phones: data.phones,
             Doluluk: doluluk,
+            isSatilik: data.isSatilik,
             project: currentProject
         };
 
@@ -85,9 +86,6 @@ async function scrapeListing() {
     } catch (e) {
         console.error('[İlan Asistanı] Hata:', e);
         if (e.message && e.message.includes('context invalidated')) {
-            return { success: false, message: '⚠️ Eklenti güncellendi. Lütfen sayfayı yenileyin (F5).' };
-        }
-        if (e.message && e.message.includes('Extension context invalidated')) {
             return { success: false, message: '⚠️ Eklenti güncellendi. Lütfen sayfayı yenileyin (F5).' };
         }
         return { success: false, message: 'Hata: ' + e.message };

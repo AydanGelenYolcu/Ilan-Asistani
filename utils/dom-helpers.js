@@ -124,9 +124,9 @@ const DOMHelpers = {
         for (const key of keys) {
             // Tam eşleşme
             if (dataMap[key]) return dataMap[key];
-            // Kısmi eşleşme (etiket "m² (Brüt)" ama map'te "m² (Brüt) " olabilir)
+            // Whitespace toleransı: map'te "m² (Brüt) " gibi trailing space olabilir
             for (const mapKey of Object.keys(dataMap)) {
-                if (mapKey.includes(key)) return dataMap[mapKey];
+                if (mapKey.trim() === key.trim()) return dataMap[mapKey];
             }
         }
         return '0';

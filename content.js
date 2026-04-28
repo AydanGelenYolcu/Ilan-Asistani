@@ -207,28 +207,29 @@ function setupMinimize() {
 
 /** Proje seçim/oluşturma mantığı */
 function setupProjectLogic() {
-    const projSelect = document.getElementById('projectSelect');
 
     function loadProjects() {
         chrome.storage.local.get(['projectNames', 'activeProject'], (result) => {
             const list = result.projectNames || ['Varsayılan'];
             const active = result.activeProject || 'Varsayılan';
 
-            if (!projSelect) return;
+            const sel = document.getElementById('projectSelect');
+            if (!sel) return;
 
-            projSelect.innerHTML = '';
+            sel.innerHTML = '';
             list.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p;
                 opt.innerText = p;
                 if (p === active) opt.selected = true;
-                projSelect.appendChild(opt);
+                sel.appendChild(opt);
             });
         });
     }
     loadProjects();
 
     // Proje değişikliği
+    const projSelect = document.getElementById('projectSelect');
     if (projSelect) {
         projSelect.addEventListener('change', () => {
             const val = projSelect.value.trim() || 'Varsayılan';
@@ -239,17 +240,24 @@ function setupProjectLogic() {
     // Yeni proje butonu
     const btnNewProj = document.getElementById('btnNewProject');
     if (btnNewProj) {
-        btnNewProj.addEventListener('click', (e) => {
+        btnNewProj.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
             const name = prompt('Yeni Proje Adı:');
-            if (!name) return;
+            if (!name || !name.trim()) return;
+            const trimmedName = name.trim();
 
             chrome.storage.local.get(['projectNames'], (res) => {
                 const list = res.projectNames || ['Varsayılan'];
-                if (!list.includes(name)) {
-                    list.push(name);
-                    chrome.storage.local.set({ projectNames: list, activeProject: name }, loadProjects);
+                if (!list.includes(trimmedName)) {
+                    list.push(trimmedName);
+                    chrome.storage.local.set({ projectNames: list, activeProject: trimmedName }, () => {
+                        if (chrome.runtime.lastError) {
+                            console.error('[İlan Asistanı] Proje kayıt hatası:', chrome.runtime.lastError);
+                            return;
+                        }
+                        loadProjects();
+                    });
                 } else {
                     alert('Bu isimde proje zaten var!');
                 }

@@ -212,6 +212,15 @@
                 style="display:flex; gap:5px; overflow-x:auto; padding-bottom: 5px;">
                 <!-- Tabs -->
             </div>
+            <!-- Proje Notu -->
+            <div style="margin-top:4px;">
+                <textarea id="projectNote" class="project-note-textarea" placeholder="Bu proje için notlar..."></textarea>
+                <div style="display:flex; gap:6px; margin-top:5px;">
+                    <button id="btnSaveNote" class="btn-primary" style="padding:5px 12px; font-size:12px;">💾 Kaydet</button>
+                    <button id="btnCopyNote" class="btn-secondary" style="padding:5px 12px; font-size:12px;">📋 Kopyala</button>
+                    <span id="noteSavedMsg" style="font-size:12px; color:#28a745; align-self:center; display:none;">✔ Kaydedildi</span>
+                </div>
+            </div>
         </div>
 
         <!-- Integrated Widgets (Right) -->
@@ -277,6 +286,10 @@
             Kopyala</button>
         <button id="downloadBtn" class="btn-success" style="width: auto; padding: 6px 12px; font-size: 13px;">📥
             Excel</button>
+        <button id="undoBtn" class="btn-secondary" disabled style="width: auto; padding: 6px 12px; font-size: 13px;"
+            title="Son silinen ilanı geri al (Ctrl+Z)">↩ Geri Al</button>
+        <button id="redoBtn" class="btn-secondary" disabled style="width: auto; padding: 6px 12px; font-size: 13px;"
+            title="Geri alınan silmeyi tekrar uygula (Ctrl+Y)">↪ İleri Al</button>
         <button id="clearAllBtn" class="btn-danger" style="width: auto; padding: 6px 12px; font-size: 13px;"
             title="Sadece bu projedeki ilanları siler">🗑️ Projeyi Temizle</button>
         <button id="resetAllBtn" class="btn-danger"

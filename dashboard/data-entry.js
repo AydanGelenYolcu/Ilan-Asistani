@@ -68,12 +68,55 @@ const DataEntryModule = {
                 i.Link === itemLink && (i.project || 'Varsayılan') === DashboardState.currentProject
             );
             if (idx !== -1) {
+                const deletedItem = data[idx];
                 data.splice(idx, 1);
                 chrome.storage.local.set({ sahibindenListem: data }, () => {
+                    DashboardState.undoStack.push({ item: deletedItem, idx });
+                    if (DashboardState.undoStack.length > 20) DashboardState.undoStack.shift();
+                    DashboardState.redoStack = [];
+                    DataEntryModule._syncUndoRedoBtns();
                     loadProjectsAndData();
                 });
             }
         });
+    },
+
+    undoDelete() {
+        if (!DashboardState.undoStack.length) return;
+        const { item, idx } = DashboardState.undoStack.pop();
+        chrome.storage.local.get(['sahibindenListem'], (result) => {
+            let data = result.sahibindenListem || [];
+            data.splice(Math.min(idx, data.length), 0, item);
+            chrome.storage.local.set({ sahibindenListem: data }, () => {
+                DashboardState.redoStack.push({ item, idx });
+                DataEntryModule._syncUndoRedoBtns();
+                loadProjectsAndData();
+            });
+        });
+    },
+
+    redoDelete() {
+        if (!DashboardState.redoStack.length) return;
+        const { item, idx } = DashboardState.redoStack.pop();
+        chrome.storage.local.get(['sahibindenListem'], (result) => {
+            let data = result.sahibindenListem || [];
+            const findIdx = data.findIndex(i =>
+                i.Link === item.Link && (i.project || 'Varsayılan') === (item.project || 'Varsayılan')
+            );
+            if (findIdx !== -1) data.splice(findIdx, 1);
+            chrome.storage.local.set({ sahibindenListem: data }, () => {
+                DashboardState.undoStack.push({ item, idx });
+                DataEntryModule._syncUndoRedoBtns();
+                loadProjectsAndData();
+            });
+        });
+    },
+
+    _syncUndoRedoBtns() {
+        const u = document.getElementById('undoBtn');
+        const r = document.getElementById('redoBtn');
+        if (u) u.disabled = DashboardState.undoStack.length === 0;
+        if (r) r.disabled = DashboardState.redoStack.length === 0;
     },
 
     clearCurrentProjectData() {
@@ -114,3 +157,5 @@ function addManualEntry() { DataEntryModule.addManualEntry(); }
 function deleteOne(itemLink) { DataEntryModule.deleteOne(itemLink); }
 function clearCurrentProjectData() { DataEntryModule.clearCurrentProjectData(); }
 function resetAllData() { DataEntryModule.resetAllData(); }
+function undoDelete() { DataEntryModule.undoDelete(); }
+function redoDelete() { DataEntryModule.redoDelete(); }

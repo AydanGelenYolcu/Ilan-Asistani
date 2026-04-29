@@ -10,7 +10,7 @@
  * window üzerinde global olarak erişilebilir.
  */
 function loadProjectsAndData() {
-    chrome.storage.local.get(['sahibindenListem', 'projectNames', 'activeProject', 'exchangeRate', 'statsCurrency'], (result) => {
+    chrome.storage.local.get(['sahibindenListem', 'projectNames', 'activeProject', 'exchangeRate', 'statsCurrency', 'projectNotes', 'projectHistData'], (result) => {
         const projects = result.projectNames || ['Varsayılan'];
         const targetCur = result.statsCurrency || 'USD';
         const rateData = result.exchangeRate;
@@ -54,6 +54,31 @@ function loadProjectsAndData() {
         }
 
         ProjectsModule.renderTabs(projects, DashboardState.currentProject, document.getElementById('projectSearch')?.value || '');
+
+        // Proje notunu yükle
+        const notes = result.projectNotes || {};
+        const noteEl = document.getElementById('projectNote');
+        if (noteEl) noteEl.value = notes[DashboardState.currentProject] || '';
+
+        // Proje bazlı geçmiş karşılaştırma verilerini yükle
+        const histData = result.projectHistData || {};
+        const projectHist = histData[DashboardState.currentProject] || {};
+        const histFieldIds = ['histPrice3m', 'histPrice6m', 'histPrice1y', 'histAidat3m', 'histAidat6m', 'histAidat1y'];
+        histFieldIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = projectHist[id] || '';
+        });
+        const excelIdEl = document.getElementById('excelIdSearch');
+        const namesDisplay = document.getElementById('excelNamesDisplay');
+        if (excelIdEl) {
+            excelIdEl.value = projectHist.excelId || '';
+            if (projectHist.excelId && typeof ExcelUploadModule !== 'undefined') {
+                ExcelUploadModule.lookupNamesOnly(projectHist.excelId);
+            } else if (namesDisplay) {
+                namesDisplay.textContent = '';
+                namesDisplay.title = '';
+            }
+        }
 
         const allData = result.sahibindenListem || [];
         let filteredData = allData.filter(item => {
@@ -109,6 +134,76 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('addManualBtn').addEventListener('click', () => DataEntryModule.addManualEntry());
     document.getElementById('btnOpenGuide').addEventListener('click', () => {
         window.open('guide.html', '_blank');
+    });
+
+    // Geri Al / İleri Al
+    document.getElementById('undoBtn').addEventListener('click', () => DataEntryModule.undoDelete());
+    document.getElementById('redoBtn').addEventListener('click', () => DataEntryModule.redoDelete());
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            DataEntryModule.undoDelete();
+        }
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
+            e.preventDefault();
+            DataEntryModule.redoDelete();
+        }
+    });
+
+    // Not: Kaydet
+    document.getElementById('btnSaveNote').addEventListener('click', () => {
+        const noteEl = document.getElementById('projectNote');
+        const msg = document.getElementById('noteSavedMsg');
+        if (!noteEl) return;
+        chrome.storage.local.get(['projectNotes'], (res) => {
+            const notes = res.projectNotes || {};
+            notes[DashboardState.currentProject] = noteEl.value;
+            chrome.storage.local.set({ projectNotes: notes }, () => {
+                if (msg) {
+                    msg.style.display = 'inline';
+                    setTimeout(() => { msg.style.display = 'none'; }, 2000);
+                }
+            });
+        });
+    });
+
+    // Geçmiş karşılaştırma alanlarını proje bazlı kaydet
+    const histFieldIds = ['histPrice3m', 'histPrice6m', 'histPrice1y', 'histAidat3m', 'histAidat6m', 'histAidat1y'];
+    let histSaveTimer = null;
+    const saveProjectHist = () => {
+        clearTimeout(histSaveTimer);
+        histSaveTimer = setTimeout(() => {
+            chrome.storage.local.get(['projectHistData'], (res) => {
+                const histData = res.projectHistData || {};
+                const current = histData[DashboardState.currentProject] || {};
+                histFieldIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) current[id] = el.value;
+                });
+                const excelIdEl = document.getElementById('excelIdSearch');
+                if (excelIdEl) current.excelId = excelIdEl.value;
+                histData[DashboardState.currentProject] = current;
+                chrome.storage.local.set({ projectHistData: histData });
+            });
+        }, 250); // debounce
+    };
+    histFieldIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', saveProjectHist);
+    });
+    const excelIdSearchEl = document.getElementById('excelIdSearch');
+    if (excelIdSearchEl) excelIdSearchEl.addEventListener('input', saveProjectHist);
+
+    // Not: Kopyala
+    document.getElementById('btnCopyNote').addEventListener('click', () => {
+        const noteEl = document.getElementById('projectNote');
+        if (!noteEl || !noteEl.value.trim()) return;
+        navigator.clipboard.writeText(noteEl.value).then(() => {
+            const btn = document.getElementById('btnCopyNote');
+            const orig = btn.textContent;
+            btn.textContent = '✔ Kopyalandı';
+            setTimeout(() => { btn.textContent = orig; }, 1500);
+        });
     });
 
     const pSearch = document.getElementById('projectSearch');

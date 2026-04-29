@@ -329,21 +329,23 @@ function setupQuickAddButton(scraper) {
         // Aidat/m² hesabı
         const aidatM2 = (brutVal > 0 && aidatVal > 0) ? (aidatVal / brutVal).toFixed(2) : '';
 
-        // Durum tespiti
+        // Durum tespiti (TR + EN)
         let currentDurum = 'Belirsiz';
         const items = document.querySelectorAll('.classifiedInfoList li');
         for (const item of items) {
             const txt = item.innerText;
-            if (txt.includes('Durumu') || txt.includes('Boş/Dolu') || txt.includes('Kategori')) {
-                if (txt.includes('Satılık')) currentDurum = 'Satılık';
-                if (txt.includes('Kiralık')) currentDurum = 'Kiralık';
+            const isStatusRow = txt.includes('Durumu') || txt.includes('Boş/Dolu') || txt.includes('Kategori') ||
+                txt.includes('Real Estate') || txt.includes('Category') || txt.includes('Listing Type');
+            if (isStatusRow) {
+                if (txt.includes('Satılık') || /\bFor\s+Sale\b/i.test(txt)) currentDurum = 'Satılık';
+                if (txt.includes('Kiralık') || /\bFor\s+Rent\b/i.test(txt)) currentDurum = 'Kiralık';
             }
         }
         // Fallback: başlıktan bak
         if (currentDurum === 'Belirsiz') {
             const tLower = document.title.toLowerCase();
-            if (tLower.includes('satılık')) currentDurum = 'Satılık';
-            if (tLower.includes('kiralık')) currentDurum = 'Kiralık';
+            if (tLower.includes('satılık') || tLower.includes('for sale')) currentDurum = 'Satılık';
+            if (tLower.includes('kiralık') || tLower.includes('for rent')) currentDurum = 'Kiralık';
         }
 
         // Eşyalı kontrolü

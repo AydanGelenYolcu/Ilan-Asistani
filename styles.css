@@ -1,3 +1,30 @@
+/* ── Proje Notu ── */
+.project-note-textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+  color: #333;
+  background: #fafafa;
+}
+.project-note-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  background: #fff;
+}
+
+/* ── Geri Al / İleri Al devre dışı stili ── */
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 :root {
   --primary-color: #007bff;
   /* Vibrant Blue */

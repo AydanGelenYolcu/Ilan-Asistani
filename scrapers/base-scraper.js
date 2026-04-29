@@ -69,20 +69,26 @@ class BaseScraper {
 
     // ─── DURUM TESPİTİ ───
 
-    /** Eşyalı/mobilyalı kontrolü */
+    /** Eşyalı/mobilyalı kontrolü (TR + EN) */
     checkFurnished(title, descText) {
-        const regex = /(?:e[şs]yal[ıi]|mob[iı]l?yal[ıi])/i;
+        // \bfurnished\b: "unfurnished" yanlış pozitifini önler (un|furnished sözcük sınırı yok)
+        const regex = /(?:e[şs]yal[ıi]|mob[iı]l?yal[ıi]|\bfurnished\b)/i;
 
         // 1. Başlık kontrolü
         if (regex.test(title)) return true;
 
         // 2. Açıklama kontrolü (olumsuz ifadeler hariç)
+        // Not: 'boş' tek başına çok geniş ('boş arsa', 'boş kontör' vs.); spesifik ifadelerle eşleştir.
         if (descText) {
             const d = descText.toLocaleLowerCase('tr-TR');
             if (regex.test(d)) {
                 if (!d.includes('eşyalı değil') &&
                     !d.includes('mobilyalı değil') &&
-                    !d.includes('boş')) {
+                    !d.includes('boş teslim') &&
+                    !d.includes('boş olarak teslim') &&
+                    !d.includes('boş şekilde teslim') &&
+                    !d.includes('unfurnished') &&
+                    !d.includes('not furnished')) {
                     return true;
                 }
             }
@@ -99,14 +105,14 @@ class BaseScraper {
     }
 
     /**
-     * Satılık/Kiralık durum tespiti.
+     * Satılık/Kiralık durum tespiti (TR + EN).
      * @param {string} checkString — Durum + Kategori + Başlık birleşimi
      * @returns {{ isSatilik: boolean, isKiralik: boolean }}
      */
     detectStatus(checkString) {
         return {
-            isSatilik: /sat[ıi]l[ıi]k/i.test(checkString),
-            isKiralik: /kiral[ıi]k/i.test(checkString)
+            isSatilik: /sat[ıi]l[ıi]k|for\s+sale/i.test(checkString),
+            isKiralik: /kiral[ıi]k|for\s+rent/i.test(checkString)
         };
     }
 }

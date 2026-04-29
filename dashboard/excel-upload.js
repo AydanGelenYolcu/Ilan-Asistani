@@ -218,6 +218,39 @@ const ExcelUploadModule = {
         });
     },
 
+    /**
+     * Sadece "excelNamesDisplay"i günceller, hist alanlarını ezmez.
+     * Proje değişiminde kayıtlı manuel girişlerin korunması için kullanılır.
+     */
+    lookupNamesOnly(searchId) {
+        const namesDisplay = document.getElementById('excelNamesDisplay');
+        if (!namesDisplay) return;
+        chrome.storage.local.get(['excelHistData'], (result) => {
+            const excelData = result.excelHistData;
+            if (!excelData || !excelData.sheets || excelData.sheets.length === 0) {
+                namesDisplay.textContent = '';
+                return;
+            }
+            const targetSheets = excelData.sheets.slice(0, 3);
+            const allNames = new Set();
+            const normalized = searchId.toString().trim().toLowerCase();
+
+            for (const sheet of targetSheets) {
+                sheet.rows
+                    .filter(r => r.id.toString().trim().toLowerCase() === normalized)
+                    .forEach(r => { if (r.name && r.name.trim()) allNames.add(r.name.trim()); });
+            }
+
+            if (allNames.size > 0) {
+                namesDisplay.textContent = '📋 ' + Array.from(allNames).join(' | ');
+                namesDisplay.title = Array.from(allNames).join('\n');
+            } else {
+                namesDisplay.textContent = '❌ Bu ID bulunamadı';
+                namesDisplay.title = '';
+            }
+        });
+    },
+
     clearHistoricalFields() {
         const fields = ['histPrice3m', 'histPrice6m', 'histPrice1y', 'histAidat3m', 'histAidat6m', 'histAidat1y'];
         fields.forEach(id => {

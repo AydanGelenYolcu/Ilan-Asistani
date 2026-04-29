@@ -33,26 +33,34 @@ class SahibindenScraper extends BaseScraper {
 
         // ── 3. ALAN (Area) — HashMap'ten O(1) erişim ──
         let brut = DOMHelpers.clean(
-            DOMHelpers.getFromMap(infoMap, ['m² (Brüt)', 'm2 (Brüt)', 'Brüt', 'Brüt m²', 'Toplam m²', 'Kullanım Alanı', 'Brüt Alan'])
+            DOMHelpers.getFromMap(infoMap, [
+                'm² (Brüt)', 'm2 (Brüt)', 'Brüt', 'Brüt m²', 'Toplam m²', 'Kullanım Alanı', 'Brüt Alan',
+                'm² (Gross)', 'm2 (Gross)', 'Gross', 'Gross Area', 'Total Area'
+            ])
         );
         if (brut === 0) {
             brut = DOMHelpers.clean(DOMHelpers.getFromMap(infoMap, ['m²', 'm2', 'Metrekare']));
         }
 
         let net = DOMHelpers.clean(
-            DOMHelpers.getFromMap(infoMap, ['m² (Net)', 'm2 (Net)', 'Net', 'Net m²', 'Net Alan', 'Faydalı Alan'])
+            DOMHelpers.getFromMap(infoMap, [
+                'm² (Net)', 'm2 (Net)', 'Net', 'Net m²', 'Net Alan', 'Faydalı Alan',
+                'Net Area', 'Usable Area'
+            ])
         );
 
         // ── 4. AİDAT ──
-        let aidat = DOMHelpers.clean(DOMHelpers.getFromMap(infoMap, ['Aidat', 'Aidat (TL)']));
+        let aidat = DOMHelpers.clean(DOMHelpers.getFromMap(infoMap, [
+            'Aidat', 'Aidat (TL)', 'Maintenance Fee', 'Maintenance Fee (TL)', 'Maintenance'
+        ]));
         if (aidat === 0) aidat = this._parseAidatFromDesc(descLower);
 
         // ── 5. DURUM (Status) — HashMap'ten oku ──
         // ÖNEMLİ: 'Emlak Tipi' önce aranmalı! 'Durumu' araması 'İmar Durumu'nu
         // kısmen eşleştirir ve 'Konut' döndürür, bu da Satılık algılamayı bozar.
-        const emlakTipi = DOMHelpers.getFromMap(infoMap, ['Emlak Tipi']);
-        let durum = emlakTipi !== '0' ? emlakTipi : DOMHelpers.getFromMap(infoMap, ['Durumu']);
-        const kategori = DOMHelpers.getFromMap(infoMap, ['Kategori']);
+        const emlakTipi = DOMHelpers.getFromMap(infoMap, ['Emlak Tipi', 'Real Estate Type', 'Property Type']);
+        let durum = emlakTipi !== '0' ? emlakTipi : DOMHelpers.getFromMap(infoMap, ['Durumu', 'Real Estate', 'Listing Type']);
+        const kategori = DOMHelpers.getFromMap(infoMap, ['Kategori', 'Category']);
         // emlakTipi'ni her zaman checkStr'e ekle; URL path iş yeri gibi kategoriler için güvenlik ağı
         // (iş yeri ilanlarında tabloda ne "Emlak Tipi" ne "İlan Durumu" olur, sadece URL'de "satilik/kiralik" geçer)
         const checkStr = (durum + ' ' + kategori + ' ' + title + ' ' + emlakTipi + ' ' + window.location.pathname).toLocaleLowerCase('tr-TR');
@@ -61,8 +69,8 @@ class SahibindenScraper extends BaseScraper {
         // Guard: Durum label düzeltmesi
         if (!durum || durum === '0') durum = kategori;
         if (durum === '0') durum = 'Belirsiz';
-        if (isSatilik && !/sat[ıi]l[ıi]k/i.test(durum)) durum = 'Satılık ' + durum;
-        if (isKiralik && !/kiral[ıi]k/i.test(durum)) durum = 'Kiralık ' + durum;
+        if (isSatilik && !/sat[ıi]l[ıi]k|for\s+sale/i.test(durum)) durum = 'Satılık ' + durum;
+        if (isKiralik && !/kiral[ıi]k|for\s+rent/i.test(durum)) durum = 'Kiralık ' + durum;
 
         // ── 5. GELİŞMİŞ M² PARSER ──
         let isTahmin = false;
@@ -78,7 +86,16 @@ class SahibindenScraper extends BaseScraper {
         }
 
         // ── 6. EŞYALI KONTROLÜ ──
-        const isFurnished = this.checkFurnished(title, descText);
+        // Önce bilgi tablosundan kesin değeri ara; yoksa eski mantığa düş
+        const furnishedVal = DOMHelpers.getFromMap(infoMap, ['Eşyalı', 'Furnished']);
+        let isFurnished;
+        if (/^\s*(Evet|Yes)\s*$/i.test(furnishedVal)) {
+            isFurnished = true;
+        } else if (/^\s*(Hayır|No)\s*$/i.test(furnishedVal)) {
+            isFurnished = false;
+        } else {
+            isFurnished = this.checkFurnished(title, descText);
+        }
 
         // ── 7. İLETİŞİM BİLGİLERİ (Contact Info) ──
         const corpusElement = document.querySelector('.user-info-module');
@@ -116,7 +133,7 @@ class SahibindenScraper extends BaseScraper {
      * @private
      */
     _parseAidatFromDesc(descLower) {
-        const regex = /(?:aidat|aidatı)(?:\s+bedeli)?\s*[:\s]*(\d+(?:[.,]\d+)*)/i;
+        const regex = /(?:aidat|aidatı|maintenance(?:\s+fee)?)(?:\s+bedeli)?\s*[:\s]*(\d+(?:[.,]\d+)*)/i;
         const match = descLower.match(regex);
         if (!match) return 0;
         const val = DOMHelpers.clean(match[1]);

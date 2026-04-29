@@ -89,18 +89,24 @@ const MapScraper = {
 
         // ── Alan ──
         let brut = DOMHelpers.clean(
-            getVal(['m² (Brüt)', 'm2 (Brüt)', 'Brüt', 'Brüt m²', 'Toplam m²', 'Kullanım Alanı', 'Brüt Alan'])
+            getVal([
+                'm² (Brüt)', 'm2 (Brüt)', 'Brüt', 'Brüt m²', 'Toplam m²', 'Kullanım Alanı', 'Brüt Alan',
+                'm² (Gross)', 'm2 (Gross)', 'Gross', 'Gross Area', 'Total Area'
+            ])
         );
         if (brut === 0) brut = DOMHelpers.clean(getVal(['m²', 'm2', 'Metrekare']));
 
         let net = DOMHelpers.clean(
-            getVal(['m² (Net)', 'm2 (Net)', 'Net', 'Net m²', 'Net Alan', 'Faydalı Alan'])
+            getVal([
+                'm² (Net)', 'm2 (Net)', 'Net', 'Net m²', 'Net Alan', 'Faydalı Alan',
+                'Net Area', 'Usable Area'
+            ])
         );
 
         // ── Aidat ──
-        let aidat = DOMHelpers.clean(getVal(['Aidat', 'Aidat (TL)']));
+        let aidat = DOMHelpers.clean(getVal(['Aidat', 'Aidat (TL)', 'Maintenance Fee', 'Maintenance Fee (TL)', 'Maintenance']));
         if (aidat === 0) {
-            const aidatRegex = /(?:aidat|aidatı)(?:\s+bedeli)?\s*[:\s]*(\d+(?:[.,]\d+)*)/i;
+            const aidatRegex = /(?:aidat|aidatı|maintenance(?:\s+fee)?)(?:\s+bedeli)?\s*[:\s]*(\d+(?:[.,]\d+)*)/i;
             const aidatMatch = descLower.match(aidatRegex);
             if (aidatMatch) {
                 const parsed = DOMHelpers.clean(aidatMatch[1]);
@@ -110,17 +116,17 @@ const MapScraper = {
 
         // ── Durum ──
         // 'Emlak Tipi' öncelikli: 'Durumu' → 'İmar Durumu' kısmi eşleşme hatası önlenir
-        const emlakTipi = getVal(['Emlak Tipi']);
-        let durum = (emlakTipi && emlakTipi !== '0') ? emlakTipi : getVal(['Durumu']);
-        const kategori = getVal(['Kategori']);
+        const emlakTipi = getVal(['Emlak Tipi', 'Real Estate Type', 'Property Type']);
+        let durum = (emlakTipi && emlakTipi !== '0') ? emlakTipi : getVal(['Durumu', 'Real Estate', 'Listing Type']);
+        const kategori = getVal(['Kategori', 'Category']);
         const checkStr = (durum + ' ' + kategori + ' ' + title + ' ' + emlakTipi).toLocaleLowerCase('tr-TR');
-        const isSatilik = /sat[ıi]l[ıi]k/i.test(checkStr);
-        const isKiralik = /kiral[ıi]k/i.test(checkStr);
+        const isSatilik = /sat[ıi]l[ıi]k|for\s+sale/i.test(checkStr);
+        const isKiralik = /kiral[ıi]k|for\s+rent/i.test(checkStr);
 
         if (!durum || durum === '0') durum = kategori;
         if (durum === '0') durum = 'Belirsiz';
-        if (isSatilik && !/sat[ıi]l[ıi]k/i.test(durum)) durum = 'Satılık ' + durum;
-        if (isKiralik && !/kiral[ıi]k/i.test(durum)) durum = 'Kiralık ' + durum;
+        if (isSatilik && !/sat[ıi]l[ıi]k|for\s+sale/i.test(durum)) durum = 'Satılık ' + durum;
+        if (isKiralik && !/kiral[ıi]k|for\s+rent/i.test(durum)) durum = 'Kiralık ' + durum;
 
         // ── Gelişmiş m² Parser ──
         let isTahmin = false;
@@ -132,20 +138,33 @@ const MapScraper = {
             net = parsed.net;
         }
 
-        // ── Eşyalı Kontrolü ──
-        let isFurnished = false;
-        const furnishedRegex = /(?:e[şs]yal[ıi]|mob[iı]l?yal[ıi])/i;
-        if (furnishedRegex.test(title)) isFurnished = true;
-        if (!isFurnished && descText) {
-            const d = descText.toLocaleLowerCase('tr-TR');
-            if (furnishedRegex.test(d) && !d.includes('eşyalı değil') && !d.includes('mobilyalı değil')) {
-                isFurnished = true;
+        // ── Eşyalı Kontrolü (TR + EN) ──
+        // 1. Önce bilgi tablosundan kesin değeri ara
+        const furnishedVal = getVal(['Eşyalı', 'Furnished']);
+        let isFurnished;
+        if (/^\s*(Evet|Yes)\s*$/i.test(furnishedVal)) {
+            isFurnished = true;
+        } else if (/^\s*(Hayır|No)\s*$/i.test(furnishedVal)) {
+            isFurnished = false;
+        } else {
+            // 2. Tablo yoksa başlık + açıklama + özellikler kontrolüne düş
+            isFurnished = false;
+            const furnishedRegex = /(?:e[şs]yal[ıi]|mob[iı]l?yal[ıi]|\bfurnished\b)/i;
+            if (furnishedRegex.test(title)) isFurnished = true;
+            if (!isFurnished && descText) {
+                const d = descText.toLocaleLowerCase('tr-TR');
+                if (furnishedRegex.test(d) &&
+                    !d.includes('eşyalı değil') && !d.includes('mobilyalı değil') &&
+                    !d.includes('boş teslim') && !d.includes('boş olarak teslim') &&
+                    !d.includes('unfurnished') && !d.includes('not furnished')) {
+                    isFurnished = true;
+                }
             }
-        }
-        if (!isFurnished) {
-            const features = doc.querySelectorAll('#classifiedProperties li.selected');
-            for (const f of features) {
-                if (furnishedRegex.test(f.textContent.trim())) { isFurnished = true; break; }
+            if (!isFurnished) {
+                const features = doc.querySelectorAll('#classifiedProperties li.selected');
+                for (const f of features) {
+                    if (furnishedRegex.test(f.textContent.trim())) { isFurnished = true; break; }
+                }
             }
         }
 

@@ -233,7 +233,7 @@
 
     <!-- ═══ HERO ═══ -->
     <div class="hero">
-        <span class="version">v4.2 — Dinamik Proje Listesi, NaN Retry, Freeze Önleme, Dinamik Excel</span>
+        <span class="version">v4.3 — Bilingual Scrape, Not Kutusu, Geri Al/İleri Al, Proje Yeniden Adlandırma</span>
         <h1>📘 İlan Asistanı Kılavuzu</h1>
         <p>Sahibinden.com &amp; Hepsiemlak ilan verilerini topla, analiz et, dışa aktar. Harita desteği, akıllı ayrıştırma, döviz dönüşümü ve <strong>sim.csb.gov.tr hava kalitesi parametresi analizi</strong> ile çok daha fazlası.</p>
     </div>
@@ -400,6 +400,10 @@
             <strong>büyük/küçük harf ve Türkçe/İngilizce karakter duyarsızdır.</strong>
         </p>
 
+        <div class="info">
+            <strong>🌐 Bilingual (TR + EN):</strong> Sahibinden hesabınız İngilizceye alınmış olsa bile (örn. "m² (Gross)", "Maintenance Fee", "Real Estate Type", "For Rent", "Furnished") tüm alanlar doğru çekilir. Çift dilli anahtar listeleri ve regex'ler kullanılır.
+        </div>
+
         <h3>🔤 Harf Duyarsızlığı</h3>
         <div class="info">
             Tüm metinler <code>toLocaleLowerCase('tr-TR')</code> ile Türkçe kurallarına göre küçültülür. Regex'lerde
@@ -440,16 +444,26 @@
                     <td>KİRALIK</td>
                     <td>✅</td>
                 </tr>
+                <tr>
+                    <td>For Sale</td>
+                    <td>✅</td>
+                    <td><code>/sat[ıi]l[ıi]k|for\s+sale/i</code></td>
+                </tr>
+                <tr>
+                    <td>For Rent</td>
+                    <td>✅</td>
+                    <td><code>/kiral[ıi]k|for\s+rent/i</code></td>
+                </tr>
             </tbody>
         </table>
 
         <h3>🏠 Satılık / Kiralık Algılama</h3>
-        <p>3 kaynaktan kontrol edilir (öncelik sırasıyla):</p>
+        <p>4 kaynaktan kontrol edilir (öncelik sırasıyla):</p>
         <ol>
-            <li><strong>Emlak Tipi</strong> etiketi (örn: "Satılık Arsa", "Kiralık Daire") — <em>öncelikli kaynak</em>
-            </li>
-            <li><strong>Durumu / Kategori</strong> etiketleri</li>
-            <li><strong>İlan başlığı</strong> (fallback)</li>
+            <li><strong>Emlak Tipi / Real Estate Type / Property Type</strong> etiketi — <em>öncelikli kaynak</em></li>
+            <li><strong>Durumu / Real Estate / Listing Type</strong> etiketleri</li>
+            <li><strong>Kategori / Category</strong> etiketleri</li>
+            <li><strong>İlan başlığı + URL</strong> (fallback)</li>
         </ol>
         <div class="info warn">
             <strong>Neden önemli?</strong> Satılık ilanlarda <strong>Birim Fiyat (₺/m²)</strong> hesaplanmaz. Eşyalı
@@ -457,39 +471,27 @@
         </div>
 
         <h3>🛋️ Eşyalı Tespiti</h3>
-        <p>3 ayrı noktadan kontrol edilir:</p>
-        <table class="shortcut-table">
-            <thead>
-                <tr>
-                    <th>Kontrol Noktası</th>
-                    <th>Aranan Pattern</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>İlan Başlığı</td>
-                    <td rowspan="3"><code>/(?:e[şs]yal[ıi]|mob[iı]l?yal[ıi])/i</code><br>eşyalı, esyali, mobilyalı,
-                        mobiyalı, mobilyali…</td>
-                </tr>
-                <tr>
-                    <td>İlan Açıklaması</td>
-                </tr>
-                <tr>
-                    <td>Özellikler Paneli (tıklı öğeler)</td>
-                </tr>
-            </tbody>
-        </table>
+        <p>Öncelik sırasıyla 4 katman:</p>
+        <ol>
+            <li><strong>İlan bilgi tablosu (1. öncelik):</strong> <code>Eşyalı: Evet/Hayır</code> veya <code>Furnished: Yes/No</code> alanı varsa, bu kesin değer kullanılır — başka kontrol yapılmaz.</li>
+            <li><strong>İlan başlığı:</strong> <code>/(?:e[şs]yal[ıi]|mob[iı]l?yal[ıi]|\bfurnished\b)/i</code></li>
+            <li><strong>İlan açıklaması:</strong> Aynı regex (akıllı filtre ile)</li>
+            <li><strong>Özellikler paneli (tıklı öğeler):</strong> Aynı regex</li>
+        </ol>
         <div class="info">
-            <strong>Akıllı Filtre:</strong> "eşyalı değil" veya "mobilyalı değil" gibi olumsuz ifadeler eşyalı olarak
-            sayılmaz.
+            <strong>Akıllı Filtre:</strong> "eşyalı değil", "mobilyalı değil", "boş teslim", "boş olarak teslim", "unfurnished", "not furnished" gibi olumsuz ifadeler eşyalı olarak sayılmaz.<br>
+            <strong>Word boundary:</strong> "unfurnished" kelimesi içinde "furnished" geçse de yanlış pozitif vermez (<code>\b</code> ile sınırlandırıldı).
+        </div>
+        <div class="info warn">
+            <strong>Eski sürüm sorunu (düzeltildi):</strong> Önceden yalnızca açıklamadaki <code>'boş'</code> kelimesi eşyalı tespitini iptal ediyordu — "boş otopark", "boş kontör" gibi alakasız kullanımlar yanlış negatif yaratıyordu. Artık spesifik <code>'boş teslim'</code> ifadeleri kontrol ediliyor.
         </div>
 
         <h3>💵 Aidat Çekimi</h3>
         <ul>
-            <li><strong>Birincil:</strong> İlan bilgi tablosundan (<code>Aidat</code> veya <code>Aidat (TL)</code>
-                etiketi)</li>
+            <li><strong>Birincil:</strong> İlan bilgi tablosundan
+                (<code>Aidat</code>, <code>Aidat (TL)</code>, <code>Maintenance Fee</code>, <code>Maintenance</code> etiketleri)</li>
             <li><strong>Fallback:</strong> Tabloda yoksa ilan açıklamasında
-                <code>/(?:aidat|aidatı)(?:\s+bedeli)?\s*[:\s]*(\d+)/i</code> regex'i ile aranır
+                <code>/(?:aidat|aidatı|maintenance(?:\s+fee)?)(?:\s+bedeli)?\s*[:\s]*(\d+)/i</code> regex'i ile aranır
             </li>
         </ul>
 
@@ -610,7 +612,7 @@
 
     <!-- ═══ 8. PROJE YÖNETİMİ ═══ -->
     <div class="section green">
-        <h2>📂 8. Proje Yönetimi</h2>
+        <h2>📂 8. Proje Yönetimi <span class="badge update">GENİŞLETİLDİ</span></h2>
         <ul>
             <li><strong>Sekmeler:</strong> İlanları projelere gruplayın (Ofis A, Mağaza B, Nidakule…)</li>
             <li><strong>🔍 Arama:</strong> Dashboard'da proje ismiyle anlık filtreleme</li>
@@ -618,6 +620,38 @@
             <li><strong>Excel:</strong> Proje bazlı verileri tek tıkla dışa aktarın</li>
             <li><strong>Dinamik Güncelleme:</strong> Harita sayfası dahil tüm sayfalarda yeni proje eklendiğinde proje listesi sayfa yenilemesine gerek kalmadan otomatik güncellenir</li>
             <li><strong>Sürükle-Bırak Aktarım:</strong> Dashboard'da bir ilanı tab'a sürükleyerek farklı projeye taşıyın</li>
+            <li><strong>✏️ Yeniden Adlandırma:</strong> Proje sekmesine <strong>çift tıklayarak</strong> ismi değiştirin. Tüm ilanlar, notlar, geçmiş veriler ve aktif proje referansı otomatik güncellenir. <em>(Varsayılan projesi rezerve, adlandırılamaz.)</em></li>
+            <li><strong>📝 Proje Notu:</strong> Her projenin kendi not kutusu var (sekmelerin altında). Yazdıklarınız <strong>otomatik</strong> projeye bağlı kaydedilir. Diğer projeye geçince orada kendi notunuz görünür. <strong>📋 Kopyala</strong> ile panoya alın.</li>
+            <li><strong>📉 Proje Bazlı Geçmiş Veriler:</strong> "Geçmiş Dönem Karşılaştırması" alanları (3/6/12 ay birim fiyat ve aidat) ve Excel ID arama kutusu <strong>her projede ayrı</strong> tutulur. Bir projede yazdığınız değerler diğer projeye sızmaz.</li>
+        </ul>
+
+        <div class="info warn">
+            <strong>Veri sızıntısı düzeltmesi:</strong> Önceki sürümde geçmiş karşılaştırma alanları global'di — A projesinde girdiğiniz 125 ₺/m² değeri B'ye geçince de görünüyordu. Artık her proje kendi verilerini saklıyor; proje silinince ilgili not + geçmiş veri de temizleniyor.
+        </div>
+    </div>
+
+    <!-- ═══ 8.5 GERİ AL / İLERİ AL & NOT KUTUSU ═══ -->
+    <div class="section yellow">
+        <h2>↩ 8.5 Geri Al / İleri Al &amp; Not Kutusu <span class="badge new">YENİ</span></h2>
+
+        <h3>↩ Silme Geri Alma</h3>
+        <p>Yanlışlıkla bir ilanı sildiğinizde panik yapmayın:</p>
+        <ul>
+            <li>Action bar'daki <strong>↩ Geri Al</strong> butonu son silmeyi geri getirir</li>
+            <li><strong>↪ İleri Al</strong> ile geri alınan silmeyi tekrar uygulayabilirsiniz</li>
+            <li>Klavye kısayolları: <code>Ctrl+Z</code> geri al, <code>Ctrl+Y</code> ileri al</li>
+            <li>Son <strong>20 silme</strong> hafızada tutulur (sekme açık olduğu sürece)</li>
+        </ul>
+        <div class="info warn">
+            <strong>Sınır:</strong> Yalnızca tablodaki tek tek <strong>🗑️</strong> butonuyla yapılan silmeleri kapsar. <strong>"Projeyi Temizle"</strong>, <strong>"Tümünü Sıfırla"</strong> ve <strong>proje silme</strong> geri alınamaz — bu işlemler zaten onay diyalogu ile korunur.
+        </div>
+
+        <h3>📝 Proje Notu</h3>
+        <ul>
+            <li>Proje sekmelerinin hemen altındaki textarea — her projenin kendine ait notu</li>
+            <li><strong>💾 Kaydet</strong> butonu ile mevcut projeye kaydedilir (✔ onayı görünür)</li>
+            <li><strong>📋 Kopyala</strong> notu panoya alır</li>
+            <li>Proje değiştirince ilgili projenin notu otomatik yüklenir</li>
         </ul>
     </div>
 

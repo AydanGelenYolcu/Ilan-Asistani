@@ -5,8 +5,8 @@
  */
 const AdvancedAreaParser = {
     keywords: {
-        brut: ['brüt', 'brut', 'toplam', 'toplam alan', 'genel alan'],
-        net: ['net', 'net alan', 'kullanım alanı', 'faydalı alan', 'süpürülebilir alan']
+        brut: ['brüt', 'brut', 'toplam', 'toplam alan', 'genel alan', 'gross', 'gross area', 'total area'],
+        net: ['net', 'net alan', 'kullanım alanı', 'faydalı alan', 'süpürülebilir alan', 'net area', 'usable area']
     },
     units: /(?:m²|m2|metrekare)/i,
 
@@ -97,8 +97,8 @@ const AdvancedAreaParser = {
         const t = text.toLocaleLowerCase('tr-TR');
         let brut = 0, net = 0, isTahmin = false;
 
-        // Öncelik 0: Açık etiket çifti ("Brüt : 200 - Net : 170")
-        const explicitPairRegex = /(?:brüt|bürüt|toplam)\s*(?:alan)?\s*[:\s]*(\d+(?:[.,]\d+)?)\s*(?:m²|m2|metrekare)?\s*(?:[-–,;]|\s+)\s*(?:net|kullanım)\s*(?:alanı)?\s*[:\s]*(\d+(?:[.,]\d+)?)/gi;
+        // Öncelik 0: Açık etiket çifti ("Brüt : 200 - Net : 170" veya "Gross: 200 - Net: 170")
+        const explicitPairRegex = /(?:brüt|bürüt|toplam|gross|total)\s*(?:alan|area)?\s*[:\s]*(\d+(?:[.,]\d+)?)\s*(?:m²|m2|metrekare)?\s*(?:[-–,;]|\s+)\s*(?:net|kullanım|usable)\s*(?:alanı|area)?\s*[:\s]*(\d+(?:[.,]\d+)?)/gi;
         const epMatch = explicitPairRegex.exec(t);
         if (epMatch) {
             const v1 = this.clean(epMatch[1]);

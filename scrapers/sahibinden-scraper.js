@@ -32,15 +32,19 @@ class SahibindenScraper extends BaseScraper {
         const infoMap = DOMHelpers.scrapeAllInfo(this.selectors.infoList);
 
         // ── 3. ALAN (Area) — HashMap'ten O(1) erişim ──
-        let brut = DOMHelpers.clean(
+        // Spesifik Brüt etiketlerini ara; bulunmazsa generic m²'ye düş ve "ambiguous" işaretle.
+        const specificBrut = DOMHelpers.clean(
             DOMHelpers.getFromMap(infoMap, [
                 'm² (Brüt)', 'm2 (Brüt)', 'Brüt', 'Brüt m²', 'Toplam m²', 'Kullanım Alanı', 'Brüt Alan',
                 'm² (Gross)', 'm2 (Gross)', 'Gross', 'Gross Area', 'Total Area'
             ])
         );
-        if (brut === 0) {
-            brut = DOMHelpers.clean(DOMHelpers.getFromMap(infoMap, ['m²', 'm2', 'Metrekare']));
-        }
+        const genericM2 = specificBrut === 0
+            ? DOMHelpers.clean(DOMHelpers.getFromMap(infoMap, ['m²', 'm2', 'Metrekare']))
+            : 0;
+        let brut = specificBrut > 0 ? specificBrut : genericM2;
+        // Etikette "Brüt" yazmıyorsa bu değer Brüt mü Net mi belirsiz — açıklama parser'ı netleştirir.
+        const isBrutAmbiguous = specificBrut === 0 && genericM2 > 0;
 
         let net = DOMHelpers.clean(
             DOMHelpers.getFromMap(infoMap, [
@@ -83,6 +87,24 @@ class SahibindenScraper extends BaseScraper {
         // Tablo Brut=Net ama parser farklı Net bulmuşsa, parser'a güven
         if (brut > 0 && net > 0 && brut === net && parsed.net > 0 && parsed.net < brut) {
             net = parsed.net;
+        }
+
+        // ── Generic m² (etiketsiz) durumunda açıklamadan gelen kesin bilgiye güven ──
+        if (isBrutAmbiguous) {
+            // 1) Açıklama KESİN Brüt verdi (Net'ten 1.2'lik tahmin değil)
+            //    → Generic etiketsiz değeri geçersiz kıl, açıklamadakini al
+            if (parsed.brut > 0 && !parsed.isTahmin && parsed.brut !== brut) {
+                brut = parsed.brut;
+                if (parsed.net > 0) net = parsed.net;
+            }
+            // 2) Açıklama sadece NET verdi (parser brut'u 1.2 ile tahmin etmiş)
+            //    + generic m² değeri tam olarak Net'e eşit
+            //    → Bu sayı aslında Net, Brüt'ü tahmini olarak yeniden hesapla
+            else if (parsed.net > 0 && parsed.net === brut) {
+                net = brut;
+                brut = Math.round(brut * 1.2);
+                isTahmin = true;
+            }
         }
 
         // ── 6. EŞYALI KONTROLÜ ──

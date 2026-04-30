@@ -88,13 +88,18 @@ const MapScraper = {
         const price = DOMHelpers.clean(rawPrice);
 
         // ── Alan ──
-        let brut = DOMHelpers.clean(
+        // Spesifik Brüt etiketlerini ara; bulunmazsa generic m²'ye düş ve "ambiguous" işaretle.
+        const specificBrut = DOMHelpers.clean(
             getVal([
                 'm² (Brüt)', 'm2 (Brüt)', 'Brüt', 'Brüt m²', 'Toplam m²', 'Kullanım Alanı', 'Brüt Alan',
                 'm² (Gross)', 'm2 (Gross)', 'Gross', 'Gross Area', 'Total Area'
             ])
         );
-        if (brut === 0) brut = DOMHelpers.clean(getVal(['m²', 'm2', 'Metrekare']));
+        const genericM2 = specificBrut === 0
+            ? DOMHelpers.clean(getVal(['m²', 'm2', 'Metrekare']))
+            : 0;
+        let brut = specificBrut > 0 ? specificBrut : genericM2;
+        const isBrutAmbiguous = specificBrut === 0 && genericM2 > 0;
 
         let net = DOMHelpers.clean(
             getVal([
@@ -136,6 +141,22 @@ const MapScraper = {
         if (parsed.isTahmin) isTahmin = true;
         if (brut > 0 && net > 0 && brut === net && parsed.net > 0 && parsed.net < brut) {
             net = parsed.net;
+        }
+
+        // ── Generic m² (etiketsiz) durumunda açıklamadaki kesin bilgiye güven ──
+        if (isBrutAmbiguous) {
+            // 1) Açıklama KESİN Brüt verdi → açıklamadakini kullan
+            if (parsed.brut > 0 && !parsed.isTahmin && parsed.brut !== brut) {
+                brut = parsed.brut;
+                if (parsed.net > 0) net = parsed.net;
+            }
+            // 2) Açıklama sadece NET verdi + generic değer Net'e eşit
+            //    → Bu sayı aslında Net, Brüt'ü tahmini olarak yeniden hesapla
+            else if (parsed.net > 0 && parsed.net === brut) {
+                net = brut;
+                brut = Math.round(brut * 1.2);
+                isTahmin = true;
+            }
         }
 
         // ── Eşyalı Kontrolü (TR + EN) ──

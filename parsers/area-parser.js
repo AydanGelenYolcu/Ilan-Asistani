@@ -131,8 +131,8 @@ const AdvancedAreaParser = {
 
                 // Pattern 1: keyword ... sayı
                 const re1 = new RegExp(`${boundary}${word}[^0-9]{0,25}(\\d+(?:[.,]\\d+)?)`, 'gi');
-                // Pattern 2: sayı ... keyword
-                const re2 = new RegExp(`(\\d+(?:[.,]\\d+)?)[^a-z0-9]{0,15}${word}`, 'gi');
+                // Pattern 2: sayı ... keyword  (m²/m2/metrekare unit'leri arada olabilir)
+                const re2 = new RegExp(`(\\d+(?:[.,]\\d+)?)(?:m²|m2|metrekare|[^a-z0-9]){0,15}${word}`, 'gi');
 
                 let m;
                 while ((m = re1.exec(t)) !== null) {

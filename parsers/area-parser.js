@@ -117,7 +117,8 @@ const AdvancedAreaParser = {
         while ((pMatch = pairRegex.exec(t)) !== null) {
             const v1 = this.clean(pMatch[1]);
             const v2 = this.clean(pMatch[2]);
-            if (v1 > 0 && v2 > 0) {
+            // Her iki değer de gerçekçi alan aralığında olmalı (7/24, 3/5 gibi bağlamdışı çiftler elenir)
+            if (v1 >= 20 && v2 >= 20) {
                 brut = Math.max(v1, v2);
                 net = Math.min(v1, v2);
                 return { brut, net, isTahmin };

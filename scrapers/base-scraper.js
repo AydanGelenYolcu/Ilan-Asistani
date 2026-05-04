@@ -115,4 +115,16 @@ class BaseScraper {
             isKiralik: /kiral[ıi]k|for\s+rent/i.test(checkString)
         };
     }
+
+    /**
+     * Sanal/hazır ofis tespiti.
+     * Başlık veya açıklamada "sanal ofis" geçen ilanlar filtrelenir.
+     * (Hazır sanal ofis de bu pattern'i içerir.)
+     */
+    isVirtualOffice(title, descText) {
+        const regex = /sanal\s+ofis|virtual\s+office/i;
+        if (regex.test(title || '')) return true;
+        if (descText && regex.test(descText)) return true;
+        return false;
+    }
 }

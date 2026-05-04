@@ -116,6 +116,7 @@ class HepsiEmlakScraper extends BaseScraper {
             unitPrice, aidatM2, isTahmin, isSatilik, isFurnished,
             officeName, agentName, phones,
             isIndividual: !isCorporate,
+            isVirtualOffice: this.isVirtualOffice(title, descText),
             imageUrl: this.getImageUrl(),
             link: DOMHelpers.normalizeUrl(window.location.href)
         };

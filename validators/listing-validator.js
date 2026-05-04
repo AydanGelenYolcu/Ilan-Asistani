@@ -24,6 +24,11 @@ const ListingValidator = {
             errors.push('Sadece emlak ofisi ilanları kaydedilebilir');
         }
 
+        // Guard: Sanal / Hazır Sanal Ofis Engelleme
+        if (data.isVirtualOffice) {
+            errors.push('Sanal ofis ilanları kaydedilmez');
+        }
+
         // Guard: Fiyat kontrolleri
         if (data.price < 0) {
             errors.push('Fiyat negatif olamaz');

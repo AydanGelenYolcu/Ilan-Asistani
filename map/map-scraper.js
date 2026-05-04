@@ -213,11 +213,16 @@ const MapScraper = {
             phones = Array.from(phoneEls).map(dd => dd.textContent.trim()).join(' / ');
         }
 
+        // Sanal/hazır ofis filtresi
+        const virtualRegex = /sanal\s+ofis|virtual\s+office/i;
+        const isVirtualOffice = virtualRegex.test(title || '') || (descText && virtualRegex.test(descText));
+
         return {
             title, durum, price, brut, net, aidat,
             unitPrice, aidatM2, isTahmin, isSatilik, isFurnished,
             officeName, agentName, phones,
             isIndividual: !isCorporate,
+            isVirtualOffice,
             imageUrl,
             link: DOMHelpers.normalizeUrl(listingUrl)
         };

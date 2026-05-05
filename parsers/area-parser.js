@@ -97,7 +97,7 @@ const AdvancedAreaParser = {
         const t = text.toLocaleLowerCase('tr-TR');
         let brut = 0, net = 0, isTahmin = false;
 
-        // Öncelik 0: Açık etiket çifti ("Brüt : 200 - Net : 170" veya "Gross: 200 - Net: 170")
+        // Öncelik 0a: Açık etiket çifti — etiket önce ("Brüt : 200 - Net : 170")
         const explicitPairRegex = /(?:brüt|bürüt|toplam|gross|total)\s*(?:alan|area)?\s*[:\s]*(\d+(?:[.,]\d+)?)\s*(?:m²|m2|metrekare)?\s*(?:[-–,;]|\s+)\s*(?:net|kullanım|usable)\s*(?:alanı|area)?\s*[:\s]*(\d+(?:[.,]\d+)?)/gi;
         const epMatch = explicitPairRegex.exec(t);
         if (epMatch) {
@@ -107,6 +107,19 @@ const AdvancedAreaParser = {
                 brut = v1;
                 net = v2;
                 if (net > brut) [brut, net] = [net, brut];
+                return { brut, net, isTahmin };
+            }
+        }
+
+        // Öncelik 0b: Sayı önce, etiket sonra ("80m² BRÜT , 55 m² NET KULLANIM ALANI")
+        const reversePairRegex = /(\d+(?:[.,]\d+)?)\s*(?:m²|m2|metrekare)?\s*(?:brüt|bürüt|gross)\s*[,;\s]+\s*(\d+(?:[.,]\d+)?)\s*(?:m²|m2|metrekare)?\s*(?:net\b|kullanım|usable)/gi;
+        const rpMatch = reversePairRegex.exec(t);
+        if (rpMatch) {
+            const v1 = this.clean(rpMatch[1]);
+            const v2 = this.clean(rpMatch[2]);
+            if (v1 > 0 && v2 > 0) {
+                brut = Math.max(v1, v2);
+                net = Math.min(v1, v2);
                 return { brut, net, isTahmin };
             }
         }

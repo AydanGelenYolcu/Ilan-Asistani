@@ -170,7 +170,7 @@ const MapScraper = {
         } else {
             // 2. Tablo yoksa başlık + açıklama + özellikler kontrolüne düş
             isFurnished = false;
-            const furnishedRegex = /(?:e[şs]yal[ıi]|mob[iı]l?yal[ıi]|\bfurnished\b)/i;
+            const furnishedRegex = /(?:e[şs]yal[ıi]|mob[iı]l?ya(?:l[ıi])?|\bfurnished\b)/i;
             if (furnishedRegex.test(title)) isFurnished = true;
             if (!isFurnished && descText) {
                 const d = descText.toLocaleLowerCase('tr-TR');

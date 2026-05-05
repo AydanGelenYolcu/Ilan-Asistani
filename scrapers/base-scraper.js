@@ -72,7 +72,7 @@ class BaseScraper {
     /** Eşyalı/mobilyalı kontrolü (TR + EN) */
     checkFurnished(title, descText) {
         // \bfurnished\b: "unfurnished" yanlış pozitifini önler (un|furnished sözcük sınırı yok)
-        const regex = /(?:e[şs]yal[ıi]|mob[iı]l?yal[ıi]|\bfurnished\b)/i;
+        const regex = /(?:e[şs]yal[ıi]|mob[iı]l?ya(?:l[ıi])?|\bfurnished\b)/i;
 
         // 1. Başlık kontrolü
         if (regex.test(title)) return true;

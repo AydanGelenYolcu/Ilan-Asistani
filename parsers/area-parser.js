@@ -124,14 +124,23 @@ const AdvancedAreaParser = {
             }
         }
 
-        // Öncelik 1: Sayı çifti ("120/100", "150 - 110")
-        const pairRegex = /(\d+(?:[.,]\d+)?)\s*(?:\/|-|—|–)\s*(\d+(?:[.,]\d+)?)\s*(?:m²|m2|metrekare)?/gi;
+        // Öncelik 1: Sayı çifti ("120/100 m²", "150 - 110 m²")
+        // Telefon/tarih gibi gürültüyü elemek için m² birimi veya yakın brüt/net kelimesi zorunlu.
+        const pairRegex = /(\d+(?:[.,]\d+)?)\s*(?:\/|-|—|–)\s*(\d+(?:[.,]\d+)?)\s*(m²|m2|metrekare)?/gi;
         let pMatch;
         while ((pMatch = pairRegex.exec(t)) !== null) {
             const v1 = this.clean(pMatch[1]);
             const v2 = this.clean(pMatch[2]);
-            // Her iki değer de gerçekçi alan aralığında olmalı (7/24, 3/5 gibi bağlamdışı çiftler elenir)
+            const hasUnit = !!pMatch[3];
             if (v1 >= 20 && v2 >= 20) {
+                // Birim yoksa eşleşme etrafında brüt/net kelimesi aranır
+                if (!hasUnit) {
+                    const start = Math.max(0, pMatch.index - 30);
+                    const end = Math.min(t.length, pMatch.index + pMatch[0].length + 30);
+                    const ctx = t.slice(start, end);
+                    const hasAreaCtx = /brüt|bürüt|gross|net\b|m²|m2|metrekare/i.test(ctx);
+                    if (!hasAreaCtx) continue;
+                }
                 brut = Math.max(v1, v2);
                 net = Math.min(v1, v2);
                 return { brut, net, isTahmin };

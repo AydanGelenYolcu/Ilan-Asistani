@@ -63,6 +63,10 @@ const AdvancedAreaParser = {
         const endOfMatchIndex = index + keywordMatch[0].length;
         const afterVal = fullText.substring(endOfMatchIndex, endOfMatchIndex + 20).toLowerCase();
 
+        // Guard: sayı bir m² biriminin parçasıysa reddet ("net m2" → "2" yakalanmasın)
+        const charBeforeVal = index > 0 ? fullText[index - 1].toLowerCase() : '';
+        if (charBeforeVal === 'm' || charBeforeVal === '²') return false;
+
         // Guard: "7/24" pattern — sayıdan hemen sonra "/" geliyorsa reddet
         if (afterVal.trim().startsWith('/')) return false;
 
@@ -155,7 +159,8 @@ const AdvancedAreaParser = {
                 // Pattern 1: keyword ... sayı
                 const re1 = new RegExp(`${boundary}${word}[^0-9]{0,25}(\\d+(?:[.,]\\d+)?)`, 'gi');
                 // Pattern 2: sayı ... keyword  (m²/m2/metrekare unit'leri arada olabilir)
-                const re2 = new RegExp(`(\\d+(?:[.,]\\d+)?)(?:m²|m2|metrekare|[^a-z0-9]){0,15}${word}`, 'gi');
+                // Negative lookbehind: "m2" içindeki "2" gibi birim parçalarını yakalamasın
+                const re2 = new RegExp(`(?<![a-zçğıöşüm²])(\\d+(?:[.,]\\d+)?)(?:m²|m2|metrekare|[^a-z0-9]){0,15}${word}`, 'gi');
 
                 let m;
                 while ((m = re1.exec(t)) !== null) {

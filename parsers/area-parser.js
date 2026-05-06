@@ -64,7 +64,11 @@ const AdvancedAreaParser = {
         const afterVal = fullText.substring(endOfMatchIndex, endOfMatchIndex + 20).toLowerCase();
 
         // Guard: sayı bir m² biriminin parçasıysa reddet ("net m2" → "2" yakalanmasın)
-        const charBeforeVal = index > 0 ? fullText[index - 1].toLowerCase() : '';
+        // keywordMatch[1] = yakalanan sayı string'i; match içindeki pozisyonunu bul
+        const capturedStr = keywordMatch[1];
+        const capturedOffsetInMatch = keywordMatch[0].indexOf(capturedStr);
+        const capturedAbsIndex = index + capturedOffsetInMatch;
+        const charBeforeVal = capturedAbsIndex > 0 ? fullText[capturedAbsIndex - 1].toLowerCase() : '';
         if (charBeforeVal === 'm' || charBeforeVal === '²') return false;
 
         // Guard: "7/24" pattern — sayıdan hemen sonra "/" geliyorsa reddet

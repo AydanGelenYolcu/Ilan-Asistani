@@ -186,11 +186,17 @@ const TableModule = {
 
     editCell(td, item, field) {
         const originalValue = item[field];
-        const currentText = td.innerText;
+        const isNumeric = ['Fiyat', 'Brut', 'Net', 'Aidat', 'Doluluk', 'BirimFiyat', 'AidatM2'].includes(field);
 
         const input = document.createElement('input');
         input.type = 'text';
-        input.value = originalValue !== undefined ? originalValue : currentText;
+        // Sayısal alanlar için ham sayıyı TR formatında göster (43000 → "43.000")
+        if (isNumeric && originalValue !== undefined && originalValue !== '' && originalValue !== 0) {
+            const num = parseFloat(String(originalValue).replace(/\./g, '').replace(/,/g, '.')) || 0;
+            input.value = num > 0 ? formatMoney(num) : (originalValue || '');
+        } else {
+            input.value = originalValue !== undefined ? originalValue : td.innerText;
+        }
         input.style.width = '100%';
         input.style.boxSizing = 'border-box';
         input.classList.add('edit-input');
@@ -198,12 +204,55 @@ const TableModule = {
         td.innerText = '';
         td.appendChild(input);
         input.focus();
+        input.select();
+
+        let saved = false;
+
+        const cancel = () => {
+            if (saved) return;
+            saved = true;
+            loadProjectsAndData(); // hücreyi orijinal hâline döndür
+        };
 
         const save = () => {
-            let newValue = input.value;
+            if (saved) return;
+            saved = true;
 
-            if (['Fiyat', 'Brut', 'Net', 'Aidat', 'Doluluk', 'BirimFiyat', 'AidatM2'].includes(field)) {
-                let v = newValue.replace(/%/g, '').replace(/\./g, '').replace(/,/g, '.');
+            let newValue = input.value.trim();
+
+            // Boş bırakıldıysa veya değişmediyse kaydetme
+            if (newValue === '' || newValue === input.defaultValue) {
+                loadProjectsAndData();
+                return;
+            }
+
+            if (isNumeric) {
+                // Akıllı TR/EN format tespiti:
+                // - Son ayraç virgülse ve arkasında ≤2 hane varsa → ondalık virgül (TR: "1.500,50" veya "43,5")
+                // - Son ayraç noktaysa ve arkasında ≤2 hane varsa → ondalık nokta (EN: "1,500.50" veya "43.5")
+                // - Aksi hâlde binlik ayraç, temizle
+                let v = newValue.replace(/%/g, '');
+                const lastComma = v.lastIndexOf(',');
+                const lastDot   = v.lastIndexOf('.');
+                if (lastComma > lastDot) {
+                    // Virgül en sonda → TR ondalık: nokta = binlik ayraç
+                    const afterComma = v.slice(lastComma + 1);
+                    if (afterComma.length <= 2) {
+                        v = v.replace(/\./g, '').replace(',', '.');
+                    } else {
+                        // Virgül binlik ayraç (örn. "1,500,000")
+                        v = v.replace(/,/g, '');
+                    }
+                } else if (lastDot > lastComma) {
+                    // Nokta en sonda → EN ondalık: virgül = binlik ayraç
+                    const afterDot = v.slice(lastDot + 1);
+                    if (afterDot.length <= 2) {
+                        v = v.replace(/,/g, '');
+                    } else {
+                        // Nokta binlik ayraç (TR: "43.000")
+                        v = v.replace(/\./g, '');
+                    }
+                }
                 newValue = parseFloat(v) || 0;
             }
 
@@ -217,23 +266,19 @@ const TableModule = {
             if (['Fiyat', 'Brut', 'Aidat'].includes(field)) {
                 const price = parseFloat(item.Fiyat) || 0;
                 const aidat = parseFloat(item.Aidat) || 0;
-
                 if (!isCommercial && durum !== 'Satılık' && price > 0 && brut > 0) {
                     item.BirimFiyat = (price / brut).toFixed(2);
                 } else {
                     item.BirimFiyat = 0;
                 }
-
                 if (!isCommercial && aidat > 0 && brut > 0) {
                     item.AidatM2 = (aidat / brut).toFixed(2);
                 } else {
                     item.AidatM2 = 0;
                 }
             } else if (field === 'BirimFiyat' && !isCommercial && durum !== 'Satılık' && brut > 0) {
-                // BirimFiyat editlenince Fiyat'ı geri hesapla
                 item.Fiyat = Math.round(newValue * brut);
             } else if (field === 'AidatM2' && !isCommercial && brut > 0) {
-                // AidatM2 editlenince Aidat'ı geri hesapla
                 item.Aidat = Math.round(newValue * brut);
             }
 
@@ -252,7 +297,10 @@ const TableModule = {
         };
 
         input.onblur = save;
-        input.onkeydown = (e) => { if (e.key === 'Enter') input.blur(); };
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter') { input.blur(); }
+            if (e.key === 'Escape') { saved = false; cancel(); }
+        };
     }
 };
 

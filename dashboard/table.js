@@ -120,8 +120,8 @@ const TableModule = {
                 <td class="editable" data-field="Net">${item.Net || '-'}</td>
                 <td class="editable" data-field="Doluluk">${item.Doluluk ? item.Doluluk + '%' : '-'}</td>
                 <td class="editable" data-field="Aidat">${getMergedCell(item.Aidat, item.AidatUSD, item.AidatConverted, item.CurrencySymbol, 0)}</td>
-                <td>${getMergedCell(item.BirimFiyat, item.BirimFiyatUSD, item.BirimFiyatConverted, item.CurrencySymbol, 2)}</td>
-                <td>${getMergedCell(item.AidatM2, undefined, undefined, undefined, 2)}</td>
+                <td class="editable" data-field="BirimFiyat">${getMergedCell(item.BirimFiyat, item.BirimFiyatUSD, item.BirimFiyatConverted, item.CurrencySymbol, 2)}</td>
+                <td class="editable" data-field="AidatM2">${getMergedCell(item.AidatM2, undefined, undefined, undefined, 2)}</td>
                 <td>${linkHtml}</td>
                 <td style="font-size:12px; line-height:1.4;">
                     ${item.officeName ? `<div style="font-weight:bold; color:#d35400;">${item.officeName}</div>` : ''}
@@ -202,19 +202,20 @@ const TableModule = {
         const save = () => {
             let newValue = input.value;
 
-            if (['Fiyat', 'Brut', 'Net', 'Aidat', 'Doluluk'].includes(field)) {
+            if (['Fiyat', 'Brut', 'Net', 'Aidat', 'Doluluk', 'BirimFiyat', 'AidatM2'].includes(field)) {
                 let v = newValue.replace(/%/g, '').replace(/\./g, '').replace(/,/g, '.');
                 newValue = parseFloat(v) || 0;
             }
 
             item[field] = newValue;
 
+            const title = item.Baslik || "";
+            const isCommercial = /mağaza|dükkan/i.test(title);
+            const durum = item.Durum || "";
+            const brut = parseFloat(item.Brut) || 0;
+
             if (['Fiyat', 'Brut', 'Aidat'].includes(field)) {
-                const title = item.Baslik || "";
-                const isCommercial = /mağaza|dükkan/i.test(title);
-                const durum = item.Durum || "";
                 const price = parseFloat(item.Fiyat) || 0;
-                const brut = parseFloat(item.Brut) || 0;
                 const aidat = parseFloat(item.Aidat) || 0;
 
                 if (!isCommercial && durum !== 'Satılık' && price > 0 && brut > 0) {
@@ -228,6 +229,12 @@ const TableModule = {
                 } else {
                     item.AidatM2 = 0;
                 }
+            } else if (field === 'BirimFiyat' && !isCommercial && durum !== 'Satılık' && brut > 0) {
+                // BirimFiyat editlenince Fiyat'ı geri hesapla
+                item.Fiyat = Math.round(newValue * brut);
+            } else if (field === 'AidatM2' && !isCommercial && brut > 0) {
+                // AidatM2 editlenince Aidat'ı geri hesapla
+                item.Aidat = Math.round(newValue * brut);
             }
 
             chrome.storage.local.get(['sahibindenListem'], (result) => {
